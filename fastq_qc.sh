@@ -3,19 +3,16 @@
 # Rob Lanfear and Miriam Schalamun
 
 # A few things to set before you go
-inputf="/Users/roblanfear/Desktop/minion_test/"
-outputbase="/Users/roblanfear/Desktop/minion_qc/"
+inputf="/disks/dacelo/data/test_data_minion/"
+outputbase="/disks/dacelo/data/QC/test_data_minion/"
 ref="/disks/dacelo/data/raw_data/active_refs/Emel.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/raw_data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
 threads=10 # number of threads to use
 
 
+# set up directories for output
 outputrawqc=$outputbase"rawqc/"
-echo $outputrawqc
-
-# set up dirs
 mkdir $outputbase
-mkdir $outputbase"ngm"
 mkdir $outputrawqc
 
 
@@ -23,11 +20,7 @@ mkdir $outputrawqc
 fname=$(basename "$input_dir")
 poretools fastq $inputf | gzip > $outputbase'/'$fname'.fastq.gz'
 
-
+# TODO fix up the hard-coded filename
 # run fastqc on all the raw and trimmed data files
-echo "Running fastqc"
-date
-find $inputf -name '*.fastq.gz' | xargs fastqc  -o $outputrawqc -t $threads
-echo "Done running fastqc"
-date
+fastqc $outputbase'minion_test.fastq.gz' -o $outputrawqc -t $threads
 
