@@ -21,3 +21,9 @@ poretools yield_plot --plot-type reads --saveas $output_dir/yield_reads.pdf --th
 
 # occupancy plot
 poretools occupancy --saveas $output_dir/occupancy.pdf $input_dir
+
+# make fastq file
+fname=$(basename "$input_dir")
+poretools fastq $input_dir | gzip > $output_dir'/'$fname'.fastq.gz'
+
+
