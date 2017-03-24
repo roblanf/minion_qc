@@ -15,10 +15,12 @@ mkdir $outputbase
 mkdir $outputrawqc
 
 # make the fastq file from the fast5 files using poretools
+echo "Creating fastq file with poretools"
 fastq_file=$outputbase'reads.fastq.gz'
 poretools fastq $inputf | gzip > $fastq_file
 
-# run fastqc on all the raw and trimmed data files
+# run fastqc on the raw fastq data
+echo "Running fastqc"
 fastqc $fastq_file -o $outputrawqc -t $threads
 
 # map with BWA mem, pipe, sort
@@ -68,7 +70,3 @@ samtools index out.bam
 qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_all/" -nt $threads -c
 qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_gff/" -gff $gff -nt $threads -c
 
-
-# let's see what we get 
-cd outputbase
-multiqc . --force
