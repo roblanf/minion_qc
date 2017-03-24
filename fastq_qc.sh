@@ -3,7 +3,7 @@
 # Rob Lanfear and Miriam Schalamun
 
 # A few things to set before you go
-inputf="/disks/dacelo/data/test_data_minion/"
+inputf="/disks/dacelo/data/test_data_minion/*.fast5"
 outputbase="/disks/dacelo/data/QC/test_data_minion/"
 ref="/disks/dacelo/data/active_refs/Emel.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
