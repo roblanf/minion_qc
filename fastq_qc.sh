@@ -7,7 +7,7 @@ inputf="/disks/dacelo/data/test_data_minion/"
 outputbase="/disks/dacelo/data/QC/test_data_minion/"
 ref="/disks/dacelo/data/active_refs/Emel.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
-threads=10 # number of threads to use
+threads=20 # number of threads to use
 
 # set up directories for output
 outputrawqc=$outputbase"rawqc/"
@@ -56,16 +56,6 @@ samtools index out.bam
 qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_all/" -nt $threads -c
 qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_gff/" -gff $gff -nt $threads -c
 
-# nanoBLASTer doesn't seem to work.
-outnano=$outputbase"nano/"
-mkdir $outnano
-cd $outnano
-nanoblaster -C10 -r $ref -i $fastq_file -o out
-samtools view -bS -@ $threads out.sam > out.bam
-samtools sort -@ $threads out.bam -o out.bam
-samtools index out.bam
-qualimap bamqc -bam out.bam -outdir $outnnano"qualimap_all/" -nt $threads -c
-qualimap bamqc -bam out.bam -outdir $outnnano"qualimap_gff/" -gff $gff -nt $threads -c
 
 # let's see what we get 
 cd outputbase
