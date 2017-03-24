@@ -26,7 +26,11 @@ outBWAMEM=$outputbase"BWAMEM/"
 mkdir $outBWAMEM
 cd $outBWAMEM
 bwa index $ref
-bwa mem -x ont2d -t $threads $ref $fastq_file > out.sam
+echo "Mapping with BWAMEM"
+date
+time bwa mem -x ont2d -t $threads $ref $fastq_file > out.sam
+echo "Done Mapping with BWAMEM"
+date
 samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
@@ -37,7 +41,11 @@ qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_gff/" -gff $gff -nt $thr
 outgm=$outputbase"gm/"
 mkdir $outgm
 cd $outgm
-graphmap align -t $threads -r $ref -d $fastq_file -o out.sam --extcigar
+echo "Mapping with graphmap"
+date
+time graphmap align -t $threads -r $ref -d $fastq_file -o out.sam --extcigar
+echo "Done Mapping with graphmap"
+date
 samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
@@ -49,7 +57,11 @@ qualimap bamqc -bam out.bam -outdir $outgm"qualimap_gff/" -gff $gff -nt $threads
 outngmlr=$outputbase"ngmlr/"
 mkdir $outngmlr
 cd $outngmlr
-ngmlr -t $threads -r $ref -q $fastq_file -o out.sam -x ont
+echo "Mapping with ngmlr"
+date
+time ngmlr -t $threads -r $ref -q $fastq_file -o out.sam -x ont
+echo "Done Mapping with ngmlr"
+date
 samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam

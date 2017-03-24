@@ -1,9 +1,8 @@
 # A script by Rob Lanfear and Miriam Schalamun to do basic QC on MinIon data
 
 # set up directories for input and output
-inputf="/Users/roblanfear/Desktop/minion_test/"
-outputf="/Users/roblanfear/Desktop/minion_qc/"
-mkdir $outputf
+inputf="/disks/dacelo/data/test_data_minion"
+outputf="/disks/dacelo/data/QC/test_data_minion"
 
 # calculate basic stats and raw data and save them
 poretools stats $inputf > $outputf/stats.txt
