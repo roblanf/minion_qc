@@ -34,7 +34,7 @@ This just uses poretools to look at the raw fast5 files that come from metrichor
 ```
 to remove the comment, so it looks like this:
 ```
-#matplotlib.use('Agg') # Must be called before any other matplotlib calls
+matplotlib.use('Agg') # Must be called before any other matplotlib calls
 ```
 
 2. Do the same for ```/poretools/poretools/yield_plot.py```
@@ -48,7 +48,7 @@ matplotlib.use('Agg') # Must be called before any other matplotlib calls
 
 4. Ditto 3 for ```/poretools/poretools/occupancy.py``` (make sure it goes right after the pandas line)
 
-4. cd to /poretools and run ```python setup.py install```
+5. cd to /poretools and run ```python setup.py install```
 
 This sets things up so that you can write PDFs on your server while logged in remotely.
 
