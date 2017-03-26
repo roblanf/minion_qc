@@ -3,9 +3,9 @@
 # Rob Lanfear and Miriam Schalamun
 
 # A few things to set before you go
-inputf="/disks/dacelo/data/test_data_minion/*.fast5"
-outputbase="/disks/dacelo/data/QC/test_data_minion/"
-ref="/disks/dacelo/data/active_refs/Emel.fa.gz" # reference file as a fasta
+inputf="/disks/dacelo/data/raw_data/tree_EG1/1003_Miriam_data_downloaded/pass/"
+outputbase="/disks/dacelo/data/QC/1003_Miriam_data_downloaded/"
+ref="/disks/dacelo/data/active_refs/Egra.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
 threads=20 # number of threads to use
 
