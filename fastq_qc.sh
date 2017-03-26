@@ -7,7 +7,7 @@ inputf="/disks/dacelo/data/raw_data/tree_EG1/1003_Miriam_data_downloaded/pass/"
 outputbase="/disks/dacelo/data/QC/1003_Miriam_data_downloaded/"
 ref="/disks/dacelo/data/active_refs/Egra.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
-threads=20 # number of threads to use
+threads=50 # number of threads to use
 
 # set up directories for output
 outputrawqc=$outputbase"rawqc/"
@@ -19,22 +19,22 @@ mkdir $outputrawqc
 # just leave one of them there to use that one - they do the same
 echo "Creating fastq file with poretools"
 fastq_file=$outputbase'reads.fastq.gz'
-#time poretools fastq $inputf | gzip > $fastq_file
-time nanopolish extract --fastq $inputf | gzip > $fastq_file
+time poretools fastq $inputf | gzip > $fastq_file
+#time nanopolish extract --fastq $inputf | gzip > $fastq_file
 
 # run fastqc on the raw fastq data
 echo "Running fastqc"
 fastqc $fastq_file -o $outputrawqc -t $threads
 
 # map with BWA mem, pipe, sort
-# TODO: make sure BWA prints proper secondary mapping flags 
+# the -M flag marks shorter split hits as secondary, so we can find them later
 outBWAMEM=$outputbase"BWAMEM/"
 mkdir $outBWAMEM
 cd $outBWAMEM
 bwa index $ref
 echo "Mapping with BWAMEM"
 date
-time bwa mem -x ont2d -t $threads $ref $fastq_file > out.sam
+time bwa mem -x ont2d -M -t $threads $ref $fastq_file > out.sam
 echo "Done Mapping with BWAMEM"
 date
 samtools view -bS -@ $threads out.sam > out.bam
