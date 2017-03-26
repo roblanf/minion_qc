@@ -15,15 +15,19 @@ mkdir $outputbase
 mkdir $outputrawqc
 
 # make the fastq file from the fast5 files using poretools
+# uncoment both the nanopolish and poretools lines to compare them
+# just leave one of them there to use that one - they do the same
 echo "Creating fastq file with poretools"
 fastq_file=$outputbase'reads.fastq.gz'
-poretools fastq $inputf | gzip > $fastq_file
+#time poretools fastq $inputf | gzip > $fastq_file
+time nanopolish extract --fastq $inputf | gzip > $fastq_file
 
 # run fastqc on the raw fastq data
 echo "Running fastqc"
 fastqc $fastq_file -o $outputrawqc -t $threads
 
 # map with BWA mem, pipe, sort
+# TODO: make sure BWA prints proper secondary mapping flags 
 outBWAMEM=$outputbase"BWAMEM/"
 mkdir $outBWAMEM
 cd $outBWAMEM
@@ -69,4 +73,6 @@ samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
 qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_all/" -nt $threads -c
 qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_gff/" -gff $gff -nt $threads -c
+
+# TODO - consider turning off secondary read mapping in BWA and NGMLR to make them more comparable.
 
