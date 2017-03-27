@@ -8,6 +8,7 @@ outputbase="/disks/dacelo/data/QC/1003_Miriam_data_downloaded/"
 ref="/disks/dacelo/data/active_refs/Egra.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
 threads=50 # number of threads to use
+mem_size='50G' # memory size for Qualimap
 
 # set up directories for output
 outputrawqc=$outputbase"rawqc/"
@@ -26,6 +27,8 @@ time poretools fastq $inputf | gzip > $fastq_file
 echo "Running fastqc"
 fastqc $fastq_file -o $outputrawqc -t $threads
 
+# TODO: trim adaptors
+
 # map with BWA mem, pipe, sort
 # the -M flag marks shorter split hits as secondary, so we can find them later
 outBWAMEM=$outputbase"BWAMEM/"
@@ -40,8 +43,9 @@ date
 samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
-qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_all/" -nt $threads -c
-qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_gff/" -gff $gff -nt $threads -c
+rm out.sam
+qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
+qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
 
 # graphmap...
 outgm=$outputbase"gm/"
@@ -55,8 +59,9 @@ date
 samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
-qualimap bamqc -bam out.bam -outdir $outgm"qualimap_all/" -nt $threads -c
-qualimap bamqc -bam out.bam -outdir $outgm"qualimap_gff/" -gff $gff -nt $threads -c
+rm out.sam
+qualimap bamqc -bam out.bam -outdir $outgm"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
+qualimap bamqc -bam out.bam -outdir $outgm"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
 
 
 # ngmlr
@@ -71,8 +76,6 @@ date
 samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
-qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_all/" -nt $threads -c
-qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_gff/" -gff $gff -nt $threads -c
-
-# TODO - consider turning off secondary read mapping in BWA and NGMLR to make them more comparable.
-
+rm out.sam
+qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
+qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
