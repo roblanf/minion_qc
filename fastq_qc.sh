@@ -7,7 +7,7 @@ inputf="/disks/dacelo/data/raw_data/tree_EG1/1003_Miriam_data_downloaded/pass/"
 outputbase="/disks/dacelo/data/QC/1003_Miriam_data_downloaded/"
 ref="/disks/dacelo/data/active_refs/Egra.fa.gz" # reference file as a fasta
 gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
-threads=50 # number of threads to use
+threads=15 # number of threads to use
 mem_size='50G' # memory size for Qualimap
 
 # set up directories for output
@@ -21,7 +21,6 @@ mkdir $outputrawqc
 echo "Creating fastq file with poretools"
 fastq_file=$outputbase'reads.fastq.gz'
 time poretools fastq $inputf | gzip > $fastq_file
-#time nanopolish extract --fastq $inputf | gzip > $fastq_file
 
 # run fastqc on the raw fastq data
 echo "Running fastqc"
