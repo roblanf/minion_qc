@@ -3,67 +3,25 @@
 # Rob Lanfear and Miriam Schalamun
 
 # A few things to set before you go
-inputf="/disks/dacelo/data/raw_data/tree_EG1/1003_Miriam_data_downloaded/pass/"
-outputbase="/disks/dacelo/data/QC/1003_Miriam_data_downloaded/"
-ref="/disks/dacelo/data/active_refs/Egra.fa.gz" # reference file as a fasta
-gff="/disks/dacelo/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
-threads=15 # number of threads to use
+inputf="/data/nanopore/RB7_A2/20170609_0424_Epauciflora_A2/"
+outputbase="/data/nanopore/RB7_A2/"
+ref="/data/active_refs/Epau.fa.gz" # reference file as a fasta
+gff="/data/active_refs/Egrandis_genes_chr1_to_chr11.gff3"
+threads=55 # number of threads to use
 mem_size='50G' # memory size for Qualimap
+flowcellID="FLO-MIN107"
+kidID="SQK-LSK108"
 
-# set up directories for output
-outputrawqc=$outputbase"rawqc/"
 mkdir $outputbase
-mkdir $outputrawqc
 
-# make the fastq file from the fast5 files using poretools
-# uncoment both the nanopolish and poretools lines to compare them
-# just leave one of them there to use that one - they do the same
-echo "Creating fastq file with poretools"
-fastq_file=$outputbase'reads.fastq.gz'
-time poretools fastq $inputf | gzip > $fastq_file
+# basecall with albacore
+read_fast5_basecaller.py -i $inputf -t $threads -s $outputbase -f FLO-MIN107 -k SQK-RAD002 -r -o fastq
 
-# run fastqc on the raw fastq data
-echo "Running fastqc"
-fastqc $fastq_file -o $outputrawqc -t $threads
+# cat together the fastq's to one big fastq
+fastq_file=$outputbase"reads.fastq"
+cat $outputbase/workspace/*.fastq > $fastq_file
 
-# TODO: trim adaptors
-
-# map with BWA mem, pipe, sort
-# the -M flag marks shorter split hits as secondary, so we can find them later
-outBWAMEM=$outputbase"BWAMEM/"
-mkdir $outBWAMEM
-cd $outBWAMEM
-bwa index $ref
-echo "Mapping with BWAMEM"
-date
-time bwa mem -x ont2d -M -t $threads $ref $fastq_file > out.sam
-echo "Done Mapping with BWAMEM"
-date
-samtools view -bS -@ $threads out.sam > out.bam
-samtools sort -@ $threads out.bam -o out.bam
-samtools index out.bam
-rm out.sam
-qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
-qualimap bamqc -bam out.bam -outdir $outBWAMEM"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
-
-# graphmap...
-outgm=$outputbase"gm/"
-mkdir $outgm
-cd $outgm
-echo "Mapping with graphmap"
-date
-time graphmap align -t $threads -r $ref -d $fastq_file -o out.sam --extcigar
-echo "Done Mapping with graphmap"
-date
-samtools view -bS -@ $threads out.sam > out.bam
-samtools sort -@ $threads out.bam -o out.bam
-samtools index out.bam
-rm out.sam
-qualimap bamqc -bam out.bam -outdir $outgm"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
-qualimap bamqc -bam out.bam -outdir $outgm"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
-
-
-# ngmlr
+# map with ngmlr
 outngmlr=$outputbase"ngmlr/"
 mkdir $outngmlr
 cd $outngmlr
@@ -76,5 +34,13 @@ samtools view -bS -@ $threads out.sam > out.bam
 samtools sort -@ $threads out.bam -o out.bam
 samtools index out.bam
 rm out.sam
-qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
-qualimap bamqc -bam out.bam -outdir $outngmlr"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
+qualimap bamqc -bam out.bam -outdir $outputbase"qualimap_all/" -nt $threads -c --java-mem-size=$mem_size
+qualimap bamqc -bam out.bam -outdir $outputbase"qualimap_gff/" -gff $gff -nt $threads -c --java-mem-size=$mem_size
+
+# run nanoplot
+echo "Running nanoplot"
+outnano=$outputbase"nanoplot/"
+mkdir $outnano
+NanoPlot --fastq_rich $fastq_file --outdir $outnano --threads $threads --loglength
+NanoPlot --bam out.bam --outdir $outnano --threads $threads --loglength --prefix bam
+
