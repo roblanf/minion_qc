@@ -2,7 +2,6 @@
 library(ggplot2)
 library(viridis)
 
-
 d = read.delim("Desktop/sequencing_summary.txt")
 d = d[with(d, order(sequence_length_template)), ] # sort by read length
 d$cumulative.bases = cumsum(as.numeric(d$sequence_length_template))
@@ -50,3 +49,5 @@ ggplot(d, aes(x=sequence_length_template)) + geom_histogram(aes(y=cumsum(..count
 
 # cumulative bases by read length
 ggplot(d, aes(x=sequence_length_template, y=cumulative.bases)) + geom_line() + scale_x_log10()
+ggplot(d, aes(x=sequence_length_template, y=cumulative.bases)) + geom_line() + xlim(0, 100000)
+
