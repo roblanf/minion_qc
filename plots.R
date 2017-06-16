@@ -3,11 +3,34 @@ library(ggplot2)
 library(viridis)
 
 
+
+# build the map for R9.5
+p1 = data.frame(channel=33:64, row=rep(1:4, each=8), col=rep(1:8, 4))
+p2 = data.frame(channel=481:512, row=rep(5:8, each=8), col=rep(1:8, 4))
+p3 = data.frame(channel=417:448, row=rep(9:12, each=8), col=rep(1:8, 4))
+p4 = data.frame(channel=353:384, row=rep(13:16, each=8), col=rep(1:8, 4))
+p5 = data.frame(channel=289:320, row=rep(17:20, each=8), col=rep(1:8, 4))
+p6 = data.frame(channel=225:256, row=rep(21:24, each=8), col=rep(1:8, 4))
+p7 = data.frame(channel=161:192, row=rep(25:28, each=8), col=rep(1:8, 4))
+p8 = data.frame(channel=97:128, row=rep(29:32, each=8), col=rep(1:8, 4))
+
+q1 = data.frame(channel=1:32, row=rep(1:4, each=8), col=rep(16:9, 4))
+q2 = data.frame(channel=449:480, row=rep(5:8, each=8), col=rep(16:9, 4))
+q3 = data.frame(channel=385:416, row=rep(9:12, each=8), col=rep(16:9, 4))
+q4 = data.frame(channel=321:352, row=rep(13:16, each=8), col=rep(16:9, 4))
+q5 = data.frame(channel=257:288, row=rep(17:20, each=8), col=rep(16:9, 4))
+q6 = data.frame(channel=193:224, row=rep(21:24, each=8), col=rep(16:9, 4))
+q7 = data.frame(channel=129:160, row=rep(25:28, each=8), col=rep(16:9, 4))
+q8 = data.frame(channel=65:96, row=rep(29:32, each=8), col=rep(16:9, 4))
+
+map = rbind(p1, p2, p3, p4, p5, p6, p7, p8, q1, q2, q3, q4, q5, q6, q7, q8)
+
+
 load_summary <- function(filepath, flowcell="NA", min.q=0){
     # load a sequencing summary and add some info
     d = read.delim(filepath)
+    d$sequence_length_template = as.numeric(d$sequence_length_template)
     d = subset(d, mean_qscore_template >= min.q)
-    map = data.frame(channel=1:512, row=rep(1:16, 32), col=rep(1:32, each=16))   
     d = merge(d, map, by="channel")
     d$flowcell = flowcell
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length
@@ -22,11 +45,10 @@ reads.gt <- function(d, len){
 
 summary.stats <- function(d){
     
-    d$sequence_length_template = as.numeric(d$sequence_length_template)
     total.bases = sum(as.numeric(d$sequence_length_template))
     N50.length = d$sequence_length_template[min(which(d$cumulative.bases > (total.bases/2)))]
     mean.length = mean(as.numeric(d$sequence_length_template))
-    median.length = median(d$sequence_length_template)
+    median.length = median(as.numeric(d$sequence_length_template))
     mean.q = mean(d$mean_qscore_template)
     median.q = median(d$mean_qscore_template)
     
@@ -48,50 +70,18 @@ summary.stats <- function(d){
                 ))
 }
 
-d = load_summary("Desktop/summaries/sequencing_summaryG1.txt")
+d = load_summary("Desktop/summaries/sequencing_summary_G1.txt")
 summary.stats(d)
 
 d10 = load_summary("Desktop/summaries/sequencing_summaryG1.txt", min.q = 10)
 summary.stats(d10)
 
-ggplot(d, aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + geom_point(size=0.2, alpha=0.5) + scale_y_log10(labels = scales::comma, breaks = c(0, 50, 100, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 750000, 1000000)) + scale_colour_viridis()
-
-ggplot(d, aes(x=start_time/3600, y=num_events, colour = mean_qscore_template)) + geom_point(size=0.2, alpha=0.5) + scale_y_log10(labels = scales::comma) + scale_colour_viridis()
-
-ggplot(d, aes(x=start_time/3600, y=num_events/sequence_length_template, colour = mean_qscore_template)) + 
-  geom_point(size=0.2, alpha=0.5) + 
-  scale_y_log10(labels = scales::comma) + 
-  scale_colour_viridis()
-
-ggplot(d, aes(x=sequence_length_template, y=num_events, colour = mean_qscore_template)) + 
-  geom_point(size=0.2, alpha=0.2) + 
-  scale_x_log10(labels = scales::comma, breaks = c(10, 100, 1000, 10000, 100000, 1000000)) + 
-  scale_y_log10(labels = scales::comma, breaks = c(10, 100, 1000, 10000, 100000, 1000000)) + 
-  scale_colour_viridis() + 
-  geom_abline(slope = 1, gradient = 1)
-
-ggplot(d, aes(x=sequence_length_template, y=num_events/sequence_length_template, colour = mean_qscore_template)) + 
-  geom_point(size=0.2, alpha=0.2) + 
-  scale_x_log10(labels = scales::comma, breaks = c(10, 100, 1000, 10000, 100000, 1000000)) + 
-  scale_y_log10(labels = scales::comma, breaks = c(10, 100, 1000, 10000, 100000, 1000000)) + 
-  scale_colour_viridis() + 
-  geom_hline(yintercept = 1, linetype='dotted', colour='red')
-
-ggplot(d, aes(x=sequence_length_template, y=num_events/sequence_length_template, colour = mean_qscore_template)) + 
-  geom_point(size=0.2, alpha=0.2) + 
-  scale_x_log10(labels = scales::comma, breaks = c(1, 2, 5, 10, 100, 1000, 10000, 100000, 1000000), limits=c(0, 10)) + 
-  scale_y_log10(labels = scales::comma, breaks = c(1, 2, 5, 10, 100, 1000, 10000, 100000, 1000000)) + 
-  scale_colour_viridis() + 
-  geom_hline(yintercept = 1, linetype='dotted', colour='red') +
-  facet_grid(row~col) +
-  theme(strip.background = element_blank(), strip.text.x = element_blank(), strip.text.y = element_blank(), panel.spacing = unit(0.01, "lines"))
-
 ggplot(d, aes(x=start_time/3600, y=log(num_events/sequence_length_template), colour = mean_qscore_template)) + 
   geom_point(size=0.2, alpha=0.2) + 
   scale_colour_viridis() + 
-  ylim(0,4) + 
-  facet_wrap(~channel, ncol = 16) +
-  theme(strip.background = element_blank(), strip.text.x = element_blank(), strip.text.y = element_blank(), panel.spacing = unit(0.1, "lines"))
+  ylim(0,3) + 
+  facet_grid(row~col) +
+  theme(panel.spacing = unit(0.1, "lines"))
 
 ggplot(d, aes(x=sequence_length_template)) + geom_histogram(aes(y=cumsum(..count..)), bins = 100) + scale_x_log10() 
 
