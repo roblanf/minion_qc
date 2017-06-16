@@ -1,8 +1,8 @@
 # look at albacore's sequencing summary file
 library(ggplot2)
 library(viridis)
-
-
+library(plyr)
+library(reshape2)
 
 # build the map for R9.5
 p1 = data.frame(channel=33:64, row=rep(1:4, each=8), col=rep(1:8, 4))
@@ -39,7 +39,7 @@ load_summary <- function(filepath, flowcell="NA", min.q=0){
 }
 
 reads.gt <- function(d, len){
-    return(sum(as.numeric(which(d$sequence_length_template>len))))
+    return(length(which(d$sequence_length_template>len)))
 }
 
 
@@ -70,20 +70,45 @@ summary.stats <- function(d){
                 ))
 }
 
-d = load_summary("Desktop/summaries/sequencing_summary_G1.txt")
+channel.summary <- function(d){
+    a = ddply(d, .(channel), summarize, total.bases = sum(sequence_length_template), total.reads = sum(which(sequence_length_template>=0)), mean.read.length = mean(sequence_length_template), median.read.length = median(sequence_length_template))
+    b = melt(a, id.vars = c("channel"))
+    p = ggplot(b, aes(x = value)) + geom_histogram() + facet_wrap(~variable, scales="free", ncol = 1)
+    return(list("channels" = b, "plot" = p))    
+}
+
+d = load_summary("Desktop/summaries/sequencing_summary_A2.txt")
 summary.stats(d)
+
+ggplot(d, aes(x = sequence_length_template)) + geom_histogram() + scale_x_log10(breaks=c(1e+01, 1e+02, 1e+03,1e+04,1e+05,1e+06))
+ggplot(d, aes(x = mean_qscore_template)) + geom_histogram()
+ggplot(d, aes(x = sequence_length_template, y = mean_qscore_template)) + geom_point(alpha=0.01, size = 0.1) + scale_x_log10(breaks=c(1e+01, 1e+02, 1e+03,1e+04,1e+05,1e+06))
+d$events_per_base = d$num_events_template/d$sequence_length_template
+ggplot(d, aes(x = events_per_base)) + geom_histogram() + scale_x_log10()
+d$events_per_base[which(d$events_per_base>10)] = 10
+ggplot(d, aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + geom_point(alpha=0.01, size = 0.1) + scale_x_log10(breaks=c(1e+01, 1e+02, 1e+03,1e+04,1e+05,1e+06)) + scale_colour_viridis()
+d$events_per_base = d$num_events_template/d$sequence_length_template
+a = subset(d, channel == 213)
+ggplot(a, aes(x = start_time/3600, y = events_per_base, colour = mean_qscore_template)) + geom_point(size = 1, alpha = 0.5) + xlab("Hours into run") + scale_y_log10() + scale_colour_viridis() + xlim(0, 35)
+a = subset(d, channel == 408)
+ggplot(a, aes(x = start_time/3600, y = events_per_base, colour = mean_qscore_template)) + geom_point(size = 1, alpha = 0.5) + xlab("Hours into run") + scale_y_log10() + scale_colour_viridis() + xlim(0, 35)
+
+ggplot(d, aes(x=start_time/3600, y=events_per_base, colour = mean_qscore_template)) + 
+  geom_point(size=0.1, alpha=0.2) + 
+  scale_colour_viridis() + 
+  scale_y_log10(limits=c(1e+0, 1e+01)) + 
+  facet_grid(row~col) +
+  theme(panel.spacing = unit(0.1, "lines")) +
+  xlab("Hours into run") +
+  theme(legend.position="none")
+
+channel.summary(d)
+
+#### 
 
 d10 = load_summary("Desktop/summaries/sequencing_summaryG1.txt", min.q = 10)
 summary.stats(d10)
 
-ggplot(d, aes(x=start_time/3600, y=log(num_events/sequence_length_template), colour = mean_qscore_template)) + 
-  geom_point(size=0.2, alpha=0.2) + 
-  scale_colour_viridis() + 
-  ylim(0,3) + 
-  facet_grid(row~col) +
-  theme(panel.spacing = unit(0.1, "lines"))
-
-ggplot(d, aes(x=sequence_length_template)) + geom_histogram(aes(y=cumsum(..count..)), bins = 100) + scale_x_log10() 
 
 # cumulative bases by read length
 ggplot(d, aes(x=sequence_length_template, y=cumulative.bases)) + geom_line() + scale_x_log10() + scale_y_log10()
@@ -124,3 +149,9 @@ ggplot(fd, aes(x=sequence_length_template, y=mean_qscore_template)) +
     stat_density_2d(geom = "raster", aes(fill = ..density..), contour = FALSE) + 
     scale_fill_viridis() + facet_wrap(~flowcell, ncol=1) + xlim(0, 50000)
 
+s1 = channel.summary(f1)
+s2 = channel.summary(f2)
+s1$channels$flowcell = "A2"
+s2$channels$flowcell = "G1"
+s = rbind(s1$channels, s2$channels)
+ggplot(s, aes(x = value)) + geom_histogram(aes(fill = flowcell)) + facet_grid(flowcell~variable, scales="free") + ggtitle("Stats per channel for 2 flowcells")
