@@ -15,8 +15,44 @@ load_summary <- function(filepath, flowcell="NA", min.q=0){
     return(d)
 }
 
+reads.gt <- function(d, len){
+    return(sum(as.numeric(which(d$sequence_length_template>len))))
+}
+
+
+summary.stats <- function(d){
+    
+    d$sequence_length_template = as.numeric(d$sequence_length_template)
+    total.bases = sum(as.numeric(d$sequence_length_template))
+    N50.length = d$sequence_length_template[min(which(d$cumulative.bases > (total.bases/2)))]
+    mean.length = mean(as.numeric(d$sequence_length_template))
+    median.length = median(d$sequence_length_template)
+    mean.q = mean(d$mean_qscore_template)
+    median.q = median(d$mean_qscore_template)
+    
+    reads = c(reads.gt(d, 20000), 
+              reads.gt(d, 50000),
+              reads.gt(d, 100000),
+              reads.gt(d, 200000),
+              reads.gt(d, 500000),
+              reads.gt(d, 1000000))
+    names(reads) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m")
+            
+    return(list('total.bases' = total.bases, 
+                'N50.length' = N50.length, 
+                'mean.length' = mean.length, 
+                'median.length' = median.length,
+                'mean.q' = mean.q,
+                'median.q' = median.q,
+                'reads' = reads
+                ))
+}
 
 d = load_summary("Desktop/summaries/sequencing_summaryG1.txt")
+summary.stats(d)
+
+d10 = load_summary("Desktop/summaries/sequencing_summaryG1.txt", min.q = 10)
+summary.stats(d10)
 
 ggplot(d, aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + geom_point(size=0.2, alpha=0.5) + scale_y_log10(labels = scales::comma, breaks = c(0, 50, 100, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 750000, 1000000)) + scale_colour_viridis()
 
