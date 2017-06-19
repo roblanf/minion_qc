@@ -94,8 +94,7 @@ summary.stats <- function(d){
 channel.summary <- function(d){
     a = ddply(d, .(channel), summarize, total.bases = sum(sequence_length_template), total.reads = sum(which(sequence_length_template>=0)), mean.read.length = mean(sequence_length_template), median.read.length = median(sequence_length_template))
     b = melt(a, id.vars = c("channel"))
-    p = ggplot(b, aes(x = value)) + geom_histogram(bins = 30) + facet_wrap(~variable, scales="free", ncol = 1)
-    return(list("channels" = b, "plot" = p))    
+    return(b)    
 }
 
 fnlist <- function(x, fil){ z <- deparse(substitute(x))
@@ -173,8 +172,13 @@ ggplot(d, aes(x=start_time/3600, y=events_per_base, colour = mean_qscore_templat
 dev.off()
 
 print("Plotting flowcell channels summary histograms")
-png(filename = file.path(output.dir, "channel_summary.png"), width = 960, height = 1920)
-channel.summary(d)$plot
+png(filename = file.path(output.dir, "channel_summary.png"), width = 2400, height = 960)
+c = channel.summary(d)
+c10 = channel.summary(d10)
+c$Q_cutoff = "All reads"
+c10$Q_cutoff = "Reads with mean Q score > 10"
+cc = rbind(c, c10)
+ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + facet_grid(Q_cutoff~variable, scales="free")
 dev.off()
 
 print("Plotting flowcell yield summary")

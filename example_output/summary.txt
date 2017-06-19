@@ -1,0 +1,44 @@
+Summary stats from input file /Users/roblanfear/Desktop/summaries/sequencing_summary_A2.txt 
+
+
+all.reads.summary 
+ 	  	 
+total.bases 	 3843373607 
+ 	  	 
+N50.length 	 34354 
+ 	  	 
+mean.length 	 16150.05 
+ 	  	 
+median.length 	 7176 
+ 	  	 
+max.length 	 826249 
+ 	  	 
+mean.q 	 9.502917 
+ 	  	 
+median.q 	 10.131 
+ 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
+reads 	 83614 14651 253 10 1 0 
+ 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
+bases 	 3113987988 933314126 30331350 3045299 826249 0 
+
+
+
+q10.reads.summary 
+ 	  	 
+total.bases 	 3276103734 
+ 	  	 
+N50.length 	 36010 
+ 	  	 
+mean.length 	 27284.04 
+ 	  	 
+median.length 	 24669 
+ 	  	 
+max.length 	 210971 
+ 	  	 
+mean.q 	 12.71787 
+ 	  	 
+median.q 	 12.858 
+ 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
+reads 	 75226 13456 205 1 0 0 
+ 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
+bases 	 2811649966 854005042 22624337 210971 0 0 
