@@ -86,7 +86,7 @@ Read length, on a log10 scale, on the X axis, and counts on the Y axis.
 ![length_histogram](example_output/length_histogram.png)
 
 ### q_histogram.png
-Mean Q score for a read on the X axis, and counts on the Y axis.
+Mean Q score for a read on the X axis, and counts on the Y axis. 
 ![q_histogram](example_output/q_histogram.png)
 
 ### epb_histogram.png

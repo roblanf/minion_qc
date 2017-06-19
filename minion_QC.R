@@ -1,3 +1,5 @@
+#!/usr/bin/Rscript
+
 args<-commandArgs(TRUE)
 
 input.file = args[1]
