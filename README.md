@@ -32,7 +32,7 @@ For convenience, a lot of the plots and summary statistics are repeated on both 
 
 ### summary.txt
 
-This txt file has some simple summary statistics for the data. Entries should be self exlpanatory for the most part. The `reads` and `bases` parts are the end are just the number of reads and number of bases from reads greater than the cutoffs in the table. E.g. in the example below, for the data with reads >Q10, we have 205 reads >200Kb that sum to a total of 22624337 bases. I like this stat, because I can quickly know that I have ~4% coverage of my genome (which is ~500Kb) from these very long reads. So if I get ~25 of these flowcells I can expect ~1x coverage of ultra-long reads.
+This txt file has some simple summary statistics for the data. Entries should be self exlpanatory for the most part. The `reads` and `bases` parts are the end are just the number of reads and number of bases from reads greater than the cutoffs in the table. E.g. in the example below, for the data with reads >Q10, we have 205 reads >200Kb that sum to a total of 0.02 gigabases. I like this stat, because I can quickly know that I have ~4% coverage of my genome (which is ~500Kb) from these very long reads. So if I get ~25 of these flowcells I can expect ~1x coverage of ultra-long reads.
 
 ```
 Summary stats from input file sequencing_summary.txt 
@@ -40,7 +40,7 @@ Summary stats from input file sequencing_summary.txt
 
 all.reads.summary 
  	  	 
-total.bases 	 3843373607 
+total.gigabases 	 3.843373607 
  	  	 
 N50.length 	 34354 
  	  	 
@@ -56,13 +56,13 @@ median.q 	 10.131
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
 reads 	 83614 14651 253 10 1 0 
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-bases 	 3113987988 933314126 30331350 3045299 826249 0 
+bases 	 3.113987988 0.933314126 0.030331350 0.003045299 0.000826249 0 
 
 
 
 q10.reads.summary 
  	  	 
-total.bases 	 3276103734 
+total.gigabases 	 3.276103734 
  	  	 
 N50.length 	 36010 
  	  	 
@@ -78,7 +78,7 @@ median.q 	 12.858
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
 reads 	 75226 13456 205 1 0 0 
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-bases 	 2811649966 854005042 22624337 210971 0 0 
+bases 	 2.811649966 0.854005042 0.022624337 0.00210971 0 0 
 ```
 
 ### length_histogram.png

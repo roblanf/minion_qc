@@ -72,16 +72,16 @@ summary.stats <- function(d){
               reads.gt(d, 1000000))
     names(reads) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m")
 
-    bases = c(bases.gt(d, 20000), 
-              bases.gt(d, 50000),
-              bases.gt(d, 100000),
-              bases.gt(d, 200000),
-              bases.gt(d, 500000),
-              bases.gt(d, 1000000))
+    bases = c(bases.gt(d, 20000)/1000000000, 
+              bases.gt(d, 50000)/1000000000,
+              bases.gt(d, 100000)/1000000000,
+              bases.gt(d, 200000)/1000000000,
+              bases.gt(d, 500000)/1000000000,
+              bases.gt(d, 1000000)/1000000000)
     names(bases) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m")
     
                 
-    return(list('total.bases' = total.bases, 
+    return(list('total.gigabases' = total.bases/1000000000, 
                 'N50.length' = N50.length, 
                 'mean.length' = mean.length, 
                 'median.length' = median.length,
@@ -89,7 +89,7 @@ summary.stats <- function(d){
                 'mean.q' = mean.q,
                 'median.q' = median.q,
                 'reads' = reads,
-                'bases' = bases
+                'gigabases' = bases
                 ))
 }
 
