@@ -2,56 +2,26 @@
 
 ## What?
 
-We're just getting started with MinION data, so we thought we'd share our QC scripts
+An R script to do some basic QC on data from Oxford Nanopore's MinION sequencer, using the `sequencing_summary.txt` file from Albacore as input.
 
-## Why? 
 
-MinION data is great.
-
-## Getting started
-
-1. Install the following software: 
-
-	* *fastqc*: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-	* *poretools*: http://poretools.readthedocs.io/en/latest/content/installation.html
-
-2. Run the scripts like this:
+## Quick start
 
 ```
-sh minion_qc.sh
+Rscript minion_QC.R sequencing_summary.txt output_directory
 ```
 
-The scripts will write a bunch of stuff to the output directories you specify in them.
+*minion_QC.R*: path to this script
+*sequencing_summary.txt*: path to a sequencing_summary.txt file from Albacore
+*output_directory*: path to an output directory. Files will be overwritten.
 
-## fast5_qc.sh
-
-This just uses poretools to look at the raw fast5 files that come from metrichor. Please note that if you are running this remotely on a server, then you will need to edit a couple of things in poretools first. Specifically:
-
-1. Go to ```/poretools/poretools/hist.py```, edit this line:
-
-```
-#matplotlib.use('Agg') # Must be called before any other matplotlib calls
-```
-to remove the comment, so it looks like this:
-```
-matplotlib.use('Agg') # Must be called before any other matplotlib calls
-```
-
-2. Do the same for ```/poretools/poretools/yield_plot.py```
-
-3. Add the following two lines to the top of ```/poretools/poretools/qual_v_pos.py```, right after the ```import pandas``` line.
+## Dependencies
+A recent version of R, and install the following:
 
 ```
-import matplotlib
-matplotlib.use('Agg') # Must be called before any other matplotlib calls
-```                                                                            
+install.packages("ggplot2")
+install.packages("viridis")
+install.packages("reshape2")
+install.packages("plyr")
+```
 
-4. Ditto 3 for ```/poretools/poretools/occupancy.py``` (make sure it goes right after the pandas line)
-
-5. cd to /poretools and run ```python setup.py install```
-
-This sets things up so that you can write PDFs on your server while logged in remotely.
-
-## fastq_qc.sh
-
-So far all this does is create a fastq file with poretools, then use fastqc to look at it... more to come.
