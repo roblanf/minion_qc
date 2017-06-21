@@ -4,6 +4,9 @@
 
 An R script to do some basic QC on data from Oxford Nanopore's MinION sequencer, using the `sequencing_summary.txt` file from Albacore as input.
 
+## Why?
+
+Because other tools focus on getting data out of the fastq or fast5 files, which is slow and arduous. The benefit of this script is that it works on a single, small, .txt summary file. So it's a lot quicker than most other things out there: it takes about a minute to analyse a 4GB flowcell on my laptop. 
 
 ## Quick start
 
@@ -35,12 +38,12 @@ For convenience, a lot of the plots and summary statistics are repeated on both 
 This txt file has some simple summary statistics for the data. Entries should be self exlpanatory for the most part. The `reads` and `bases` parts are the end are just the number of reads and number of bases from reads greater than the cutoffs in the table. E.g. in the example below, for the data with reads >Q10, we have 205 reads >200Kb that sum to a total of 0.02 gigabases. I like this stat, because I can quickly know that I have ~4% coverage of my genome (which is ~500Kb) from these very long reads. So if I get ~25 of these flowcells I can expect ~1x coverage of ultra-long reads.
 
 ```
-Summary stats from input file sequencing_summary.txt 
+Summary stats from input file /Users/roblanfear/Desktop/A2/sequencing_summary.txt 
 
 
 all.reads.summary 
  	  	 
-total.gigabases 	 3.843373607 
+total.gigabases 	 3.843374 
  	  	 
 N50.length 	 34354 
  	  	 
@@ -56,29 +59,11 @@ median.q 	 10.131
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
 reads 	 83614 14651 253 10 1 0 
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-bases 	 3.113987988 0.933314126 0.030331350 0.003045299 0.000826249 0 
-
-
-
-q10.reads.summary 
+gigabases 	 3.113988 0.9333141 0.03033135 0.003045299 0.000826249 0 
  	  	 
-total.gigabases 	 3.276103734 
+ultralong.reads 	 253 
  	  	 
-N50.length 	 36010 
- 	  	 
-mean.length 	 27284.04 
- 	  	 
-median.length 	 24669 
- 	  	 
-max.length 	 210971 
- 	  	 
-mean.q 	 12.71787 
- 	  	 
-median.q 	 12.858 
- 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-reads 	 75226 13456 205 1 0 0 
- 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-bases 	 2.811649966 0.854005042 0.022624337 0.00210971 0 0 
+ultralong.gigabases 	 0.03033135 
 ```
 
 ### length_histogram.png
