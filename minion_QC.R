@@ -146,25 +146,25 @@ dd = rbind(d, d10)
 # make plots
 print("Plotting length histogram")
 png(filename = file.path(output.dir, "length_histogram.png"), width = 960, height = 960)
-ggplot(dd, aes(x = sequence_length_template)) + geom_histogram(bins = 500) + scale_x_log10() + facet_wrap(~Q_cutoff, ncol = 1) + theme(text = element_text(size = 20))
+ggplot(dd, aes(x = sequence_length_template)) + geom_histogram(bins = 500) + scale_x_log10() + facet_wrap(~Q_cutoff, ncol = 1) + theme(text = element_text(size = 15))
 dev.off()
 
 print("Plotting mean Q score histogram")
 png(filename = file.path(output.dir, "q_histogram.png"), width = 960, height = 960)
-ggplot(dd, aes(x = mean_qscore_template)) + geom_histogram(bins = 500) + facet_wrap(~Q_cutoff, ncol = 1) + theme(text = element_text(size = 20))
+ggplot(dd, aes(x = mean_qscore_template)) + geom_histogram(bins = 500) + facet_wrap(~Q_cutoff, ncol = 1) + theme(text = element_text(size = 15))
 dev.off()
 
 print("Plotting events per base histogram")
 dd$events_per_base = dd$num_events_template/dd$sequence_length_template
 png(filename = file.path(output.dir, "epb_histogram.png"), width = 960, height = 960)
-ggplot(dd, aes(x = events_per_base)) + geom_histogram(bins = 500) + scale_x_log10() + facet_wrap(~Q_cutoff, ncol = 1) + theme(text = element_text(size = 20))
+ggplot(dd, aes(x = events_per_base)) + geom_histogram(bins = 500) + scale_x_log10() + facet_wrap(~Q_cutoff, ncol = 1) + theme(text = element_text(size = 15))
 dev.off()
 
 print("Plotting read length vs. q score scatterplot")
 d$events_per_base = d$num_events_template/d$sequence_length_template
 d$events_per_base[which(d$events_per_base>10)] = 10
 png(filename = file.path(output.dir, "length_vs_q.png"), width = 960, height = 960)
-ggplot(d, aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + geom_point(alpha=0.05, size = 0.4) + scale_x_log10(breaks=c(1e+01, 1e+02, 1e+03,1e+04,1e+05,1e+06)) + scale_colour_viridis() + theme(text = element_text(size = 20))
+ggplot(d, aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + geom_point(alpha=0.05, size = 0.4) + scale_x_log10(breaks=c(1e+01, 1e+02, 1e+03,1e+04,1e+05,1e+06)) + scale_colour_viridis() + theme(text = element_text(size = 15))
 dev.off()
 
 print("Plotting flowcell channels events per base plot")
@@ -186,10 +186,17 @@ png(filename = file.path(output.dir, "channel_summary.png"), width = 2400, heigh
 c = channel.summary(d)
 c10 = channel.summary(d10)
 c$Q_cutoff = "All reads"
-c10$Q_cutoff = "mean Q>10"
+c10$Q_cutoff = "Reads with mean Q score > 10"
 cc = rbind(c, c10)
 ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + facet_grid(Q_cutoff~variable, scales="free") + theme(text = element_text(size = 20))
 dev.off()
+
+
+
+d$Q_cutoff = "All reads"
+d10$Q_cutoff = "Q > 10"
+d10$events_per_base = d10$num_events_template/d10$sequence_length_template
+dd = rbind(d, d10)
 
 print("Plotting flowcell yield summary")
 png(filename = file.path(output.dir, "yield_summary.png"), width = 960, height = 960)
@@ -198,5 +205,5 @@ ggplot(dd, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff
     scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
     xlab("Minimum read length") +
     ylab("Total yield in bases") +
-    theme(text = element_text(size = 20))
+    theme(text = element_text(size = 15))
 dev.off()

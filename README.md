@@ -14,9 +14,9 @@ Because other tools focus on getting data out of the fastq or fast5 files, which
 Rscript minion_QC.R sequencing_summary.txt output_directory
 ```
 
-*minion_QC.R*: path to this script
-*sequencing_summary.txt*: path to a sequencing_summary.txt file from Albacore
-*output_directory*: path to an output directory. Files will be overwritten.
+* *minion_QC.R*: path to this script
+* *sequencing_summary.txt*: path to a sequencing_summary.txt file from Albacore
+* *output_directory*: path to an output directory. Files will be overwritten.
 
 ## Dependencies
 A recent version of R, and install the following:
