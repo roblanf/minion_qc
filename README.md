@@ -88,5 +88,5 @@ Histograms of total bases, total reads, mean read length, and median read length
 ![channel_summary](example_output/channel_summary.png)
 
 ### flowcell_channels_epb.png
-This one's busy, but hopefully useful. The 512 channels are laid out as on the R9.5 flowcell. Then each sub-panel of the plot simply plots out the time of the run in hours on the X axis, and the events per base (log scale, cut off at 10 events per base) on the Y axis. This gives a little insight into exactly what was going on in each of your channels over the course of the run. Blow it up big!
+This one's busy, but hopefully useful. The 512 channels are laid out as on the R9.5 flowcell. Then each sub-panel of the plot simply plots out the time of the run in hours on the X axis, and the events per base (log scale, cut off at 10 events per base) on the Y axis. The colour is the mean Q score of each read - blue is low, green is high. This gives a little insight into exactly what was going on in each of your channels over the course of the run. Blow it up big! What you want is lots of green (high quality) reads, being consistently produced in each channel, and with a consistently low events-per-base score (Y axis, indicating that the reads are not stalling in the pores).
 ![flowcell_channels_epb](example_output/flowcell_channels_epb.png)
