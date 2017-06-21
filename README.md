@@ -31,38 +31,36 @@ install.packages("plyr")
 ## Output details
 More details on rationale are in [this blog post](robertlanfear.com/blog/files/nanopore_performance.html), example output is in the `/example_output` folder of this repository.
 
-### summary.txt
+### summary.yaml
 
-Simple summary statistics of the data. Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB, following the definition given in [this preprint](biorxiv.org/content/early/2017/04/20/128835).
+Simple text summary of the data in yaml format (opens in any text editor, but can also be read by any coding language). Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB, following the definition given in [this preprint](biorxiv.org/content/early/2017/04/20/128835). Here's the first part of the example file:
 
-```
-Summary stats from input file /Users/roblanfear/Desktop/A2/sequencing_summary.txt 
-
-
-all.reads.summary 
- 	  	 
-total.gigabases 	 3.843374 
- 	  	 
-N50.length 	 34354 
- 	  	 
-mean.length 	 16150.05 
- 	  	 
-median.length 	 7176 
- 	  	 
-max.length 	 826249 
- 	  	 
-mean.q 	 9.502917 
- 	  	 
-median.q 	 10.131 
- 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-reads 	 83614 14651 253 10 1 0 
- 	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
-gigabases 	 3.113988 0.9333141 0.03033135 0.003045299 0.000826249 0 
- 	  	 
-ultralong.reads 	 574 
- 	  	 
-ultralong.gigabases 	 0.06064443 
-
+```yaml
+input file: /Users/roblanfear/Desktop/sequencing_summary.txt
+All reads:
+  total.gigabases: 3.8433736
+  N50.length: 34354.0
+  mean.length: 16150.1
+  median.length: 7176.0
+  max.length: 826249.0
+  mean.q: 9.5
+  median.q: 10.1
+  reads:
+    '>20kb': 83614
+    '>50kb': 14651
+    '>100kb': 253
+    '>200kb': 10
+    '>500kb': 1
+    '>1m': 0
+    ultralong: 574
+  gigabases:
+    '>20kb': 3.113988
+    '>50kb': 0.9333141
+    '>100kb': 0.0303313
+    '>200kb': 0.0030453
+    '>500kb': 0.0008262
+    '>1m': 0.0e+00
+    ultralong: 0.0606444
 ```
 
 ### length_histogram.png

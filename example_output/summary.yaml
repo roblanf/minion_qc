@@ -1,0 +1,51 @@
+input file: /Users/roblanfear/Desktop/sequencing_summary.txt
+All reads:
+  total.gigabases: 3.8433736
+  N50.length: 34354.0
+  mean.length: 16150.1
+  median.length: 7176.0
+  max.length: 826249.0
+  mean.q: 9.5
+  median.q: 10.1
+  reads:
+    '>20kb': 83614
+    '>50kb': 14651
+    '>100kb': 253
+    '>200kb': 10
+    '>500kb': 1
+    '>1m': 0
+    ultralong: 574
+  gigabases:
+    '>20kb': 3.113988
+    '>50kb': 0.9333141
+    '>100kb': 0.0303313
+    '>200kb': 0.0030453
+    '>500kb': 0.0008262
+    '>1m': 0.0e+00
+    ultralong: 0.0606444
+Reads with Q>10:
+  total.gigabases: 3.2761037
+  N50.length: 36010.0
+  mean.length: 27284.0
+  median.length: 24669.0
+  max.length: 210971.0
+  mean.q: 12.7
+  median.q: 12.9
+  reads:
+    '>20kb': 75226
+    '>50kb': 13456
+    '>100kb': 205
+    '>200kb': 1
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 442
+  gigabases:
+    '>20kb': 2.81165
+    '>50kb': 0.854005
+    '>100kb': 0.0226243
+    '>200kb': 0.000211
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.045195
+notes: ultralong reads refers to the largest set of reads with N50>100KB
+
