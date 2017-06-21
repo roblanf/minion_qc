@@ -29,11 +29,11 @@ install.packages("plyr")
 ```
 
 ## Output details
-More details on rationale here: robertlanfear.com/blog/files/nanopore_performance.html, example output is in the `/example_output` folder of this repository.
+More details on rationale are in [this blog post](robertlanfear.com/blog/files/nanopore_performance.html), example output is in the `/example_output` folder of this repository.
 
 ### summary.txt
 
-Simple summary statistics of the data. Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB (roughly following the definition given here: biorxiv.org/content/early/2017/04/20/128835)
+Simple summary statistics of the data. Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB, following the definition given in [this preprint](biorxiv.org/content/early/2017/04/20/128835).
 
 ```
 Summary stats from input file /Users/roblanfear/Desktop/A2/sequencing_summary.txt 
