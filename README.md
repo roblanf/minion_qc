@@ -29,13 +29,11 @@ install.packages("plyr")
 ```
 
 ## Output details
-This script is designed as a fairly quick-and-dirty way to examine the quality and quantity of your MinION output. More details of the rationale behind the plots is here: robertlanfear.com/blog/files/nanopore_performance.html, below I provide a brief overview and example of the files produced (which are all the `/example_output` folder of this repository).
-
-For convenience, a lot of the plots and summary statistics are repeated on both all of the data, and on just those reads with a mean Q score >10. We found this to be a convenient cutoff to get a rough idea of how much *good* data is in a run, rather than just how much data there is overall.
+More details on rationale here: robertlanfear.com/blog/files/nanopore_performance.html, example output is in the `/example_output` folder of this repository.
 
 ### summary.txt
 
-This txt file has some simple summary statistics for the data. Entries should be self exlpanatory for the most part. The `reads` and `bases` parts are the end are just the number of reads and number of bases from reads greater than the cutoffs in the table. E.g. in the example below, for the data with reads >Q10, we have 205 reads >200Kb that sum to a total of 0.02 gigabases. I like this stat, because I can quickly know that I have ~4% coverage of my genome (which is ~500Kb) from these very long reads. So if I get ~25 of these flowcells I can expect ~1x coverage of ultra-long reads.
+Simple summary statistics of the data. Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB (roughly following the definition given here: biorxiv.org/content/early/2017/04/20/128835)
 
 ```
 Summary stats from input file /Users/roblanfear/Desktop/A2/sequencing_summary.txt 
@@ -61,9 +59,10 @@ reads 	 83614 14651 253 10 1 0
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
 gigabases 	 3.113988 0.9333141 0.03033135 0.003045299 0.000826249 0 
  	  	 
-ultralong.reads 	 253 
+ultralong.reads 	 574 
  	  	 
-ultralong.gigabases 	 0.03033135 
+ultralong.gigabases 	 0.06064443 
+
 ```
 
 ### length_histogram.png

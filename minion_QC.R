@@ -65,8 +65,11 @@ summary.stats <- function(d){
     median.q = median(d$mean_qscore_template)
     
     #calculate ultra-long reads and bases (max amount of data with N50>100KB)
-    N50s = d$sequence_length_template[(which(d$cumulative.bases > (d$cumulative.bases/2)))]
-    ultra.reads = max(which(N50s>100000))
+    for(i in 1:nrow(d)){
+        n = d$sequence_length_template[min(which(d$cumulative.bases>d$cumulative.bases[i]/2))]
+        if(n < 100000){ break }
+    }
+    ultra.reads = i-1
     ultra.gigabases = sum(as.numeric(d$sequence_length_template[1:ultra.reads]))/1000000000
     
     reads = c(reads.gt(d, 20000), 

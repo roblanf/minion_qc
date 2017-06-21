@@ -21,9 +21,9 @@ reads 	 83614 14651 253 10 1 0
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
 gigabases 	 3.113988 0.9333141 0.03033135 0.003045299 0.000826249 0 
  	  	 
-ultralong.reads 	 253 
+ultralong.reads 	 574 
  	  	 
-ultralong.gigabases 	 0.03033135 
+ultralong.gigabases 	 0.06064443 
 
 
 
@@ -47,6 +47,6 @@ reads 	 75226 13456 205 1 0 0
  	 >20kb 	 >50kb 	 >100kb 	 >200kb 	 >500kb 	 >1m 	 
 gigabases 	 2.81165 0.854005 0.02262434 0.000210971 0 0 
  	  	 
-ultralong.reads 	 205 
+ultralong.reads 	 442 
  	  	 
-ultralong.gigabases 	 0.02262434 
+ultralong.gigabases 	 0.045195 
