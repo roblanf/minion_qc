@@ -10,6 +10,7 @@ library(ggplot2)
 library(viridis)
 library(plyr)
 library(reshape2)
+library(yaml)
 
 # build the map for R9.5
 p1 = data.frame(channel=33:64, row=rep(1:4, each=8), col=rep(1:8, 4))
@@ -58,35 +59,37 @@ summary.stats <- function(d){
     
     total.bases = sum(as.numeric(d$sequence_length_template))
     N50.length = d$sequence_length_template[min(which(d$cumulative.bases > (total.bases/2)))]
-    mean.length = mean(as.numeric(d$sequence_length_template))
-    median.length = median(as.numeric(d$sequence_length_template))
+    mean.length = round(mean(as.numeric(d$sequence_length_template)), digits = 1)
+    median.length = round(median(as.numeric(d$sequence_length_template)), digits = 1)
     max.length = max(as.numeric(d$sequence_length_template))
-    mean.q = mean(d$mean_qscore_template)
-    median.q = median(d$mean_qscore_template)
+    mean.q = round(mean(d$mean_qscore_template), digits = 1)
+    median.q = round(median(d$mean_qscore_template), digits = 1)
     
     #calculate ultra-long reads and bases (max amount of data with N50>100KB)
     for(i in 1:nrow(d)){
         n = d$sequence_length_template[min(which(d$cumulative.bases>d$cumulative.bases[i]/2))]
         if(n < 100000){ break }
     }
-    ultra.reads = i-1
+    ultra.reads = as.integer(i-1)
     ultra.gigabases = sum(as.numeric(d$sequence_length_template[1:ultra.reads]))/1000000000
     
-    reads = c(reads.gt(d, 20000), 
+    reads = list(reads.gt(d, 20000), 
               reads.gt(d, 50000),
               reads.gt(d, 100000),
               reads.gt(d, 200000),
               reads.gt(d, 500000),
-              reads.gt(d, 1000000))
-    names(reads) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m")
+              reads.gt(d, 1000000),
+              ultra.reads)
+    names(reads) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
 
-    bases = c(bases.gt(d, 20000)/1000000000, 
+    bases = list(bases.gt(d, 20000)/1000000000, 
               bases.gt(d, 50000)/1000000000,
               bases.gt(d, 100000)/1000000000,
               bases.gt(d, 200000)/1000000000,
               bases.gt(d, 500000)/1000000000,
-              bases.gt(d, 1000000)/1000000000)
-    names(bases) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m")
+              bases.gt(d, 1000000)/1000000000,
+              ultra.gigabases)
+    names(bases) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
     
                 
     return(list('total.gigabases' = total.bases/1000000000, 
@@ -97,9 +100,7 @@ summary.stats <- function(d){
                 'mean.q' = mean.q,
                 'median.q' = median.q,
                 'reads' = reads,
-                'gigabases' = bases,
-                'ultralong.reads' = ultra.reads,
-                'ultralong.gigabases' = ultra.gigabases
+                'gigabases' = bases
                 ))
 }
 
@@ -109,37 +110,28 @@ channel.summary <- function(d){
     return(b)    
 }
 
-fnlist <- function(x, fil){ z <- deparse(substitute(x))
-cat(z, "\n", file=fil, append=TRUE)
-nams=names(x) 
-for (i in seq_along(x) ){ 
-  cat("", "\t", paste(names(x[[i]]), "\t"), "\n", file=fil, append=TRUE)
-  cat(nams[i], "\t",  x[[i]], "\n", file=fil, append=TRUE) }
-}
-
-
-
 # supress warnings
 options(warn=-1)
 
 
 print("Creating output directory")
 dir.create(output.dir)
-out.txt = file.path(output.dir, "summary.txt")
-
-write(paste("Summary stats from input file", input.file, "\n\n"), file = out.txt)
-
+out.txt = file.path(output.dir, "summary.yaml")
 
 # write summaries
 print("Loading and summarising input file")
 d = load_summary(input.file)
 all.reads.summary = summary.stats(d)
-fnlist(all.reads.summary, out.txt)
 
 d10 = load_summary(input.file, min.q = 10)
-write("\n\n", file = out.txt, append=TRUE)
 q10.reads.summary = summary.stats(d10)
-fnlist(q10.reads.summary, out.txt)
+
+summary = list("input file" = input.file,
+               "All reads" = all.reads.summary,
+               "Reads with Q>10" = q10.reads.summary,
+               "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
+
+write(as.yaml(summary), out.txt)
 
 d$Q_cutoff = "All reads"
 d10$Q_cutoff = "Reads with mean Q score > 10"
