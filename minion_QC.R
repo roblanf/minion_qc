@@ -166,7 +166,7 @@ print("Plotting flowcell channels events per base plot")
 d$events_per_base = d$num_events_template/d$sequence_length_template
 png(filename = file.path(output.dir, "flowcell_channels_epb.png"), width = 2400, height = 2400)
 ggplot(d, aes(x=start_time/3600, y=events_per_base, colour = mean_qscore_template)) + 
-    geom_point(size=1, alpha=0.5) + 
+    geom_point(size=1.5, alpha=0.35) + 
     scale_colour_viridis() + 
     scale_y_log10(limits=c(1e+0, 1e+01)) + 
     facet_grid(row~col) +
