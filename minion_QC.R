@@ -10,7 +10,10 @@ library(ggplot2)
 library(viridis)
 library(plyr)
 library(reshape2)
-#library(yaml)
+library(yaml)
+library(ggjoy)
+library(scales)
+library(data.table)
 
 # build the map for R9.5
 p1 = data.frame(channel=33:64, row=rep(1:4, each=8), col=rep(1:8, 4))
@@ -40,6 +43,10 @@ add_cols <- function(d, min.q){
     d = merge(d, map, by="channel")
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length
     d$cumulative.bases = cumsum(as.numeric(d$sequence_length_template))
+    d$hour = d$start_time %/% 3600
+    
+    # add the reads generated for each hour
+    setDT(d)[, reads_per_hour := sum(which(sequence_length_template>=0)), by = hour] 
     return(d)
 }
 
@@ -150,7 +157,7 @@ summary = list("input file" = input.file,
                "Reads with Q>10" = q10.reads.summary,
                "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
 
-#write(as.yaml(summary), out.txt)
+write(as.yaml(summary), out.txt)
 
 # make plots
 print("Plotting length histogram")
@@ -190,6 +197,31 @@ ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)
     xlab("Minimum read length") +
     ylab("Total yield in bases") +
     theme(text = element_text(size = 15))
+dev.off()
+
+
+print("Plotting sequence length over time")
+png(filename = file.path(output.dir, "length_by_hour.png"), width = 960, height = 960)
+ggplot(d, aes(x = sequence_length_template, y = hour, group = hour, height = ..density.., fill = reads_per_hour)) + 
+    geom_joy(scale = 3, alpha = 0.8, stat = "density") + 
+    scale_x_continuous(expand = c(0.01, 0), limits = c(0, 100000), labels = scientific) + 
+    scale_y_reverse(expand = c(0.01, 0)) + 
+    facet_wrap(~Q_cutoff, ncol = 1) +
+    theme(text = element_text(size = 15)) +
+    theme(plot.margin=unit(c(1,1,1,1),'cm')) +
+    scale_fill_viridis()
+dev.off()
+
+
+
+
+print("Plotting Q score over time")
+png(filename = file.path(output.dir, "qscore_by_hour.png"), width = 960, height = 960)
+ggplot(d, aes(x = mean_qscore_template, y = hour, group = hour)) + 
+    geom_joy(scale = 3) + theme_joy(font_size = 15) +
+    scale_x_continuous(expand = c(0.01, 0)) + 
+    scale_y_reverse(expand = c(0.01, 0)) + 
+    facet_wrap(~Q_cutoff, ncol = 1)
 dev.off()
 
 
