@@ -83,8 +83,8 @@ bases.gt <- function(d, len){
 
 summary.stats <- function(d, Q_cutoff="All reads"){
     # Write summary stats for a single value of min.q
-    
-    d = d[which(d$Q_cutoff == Q_cutoff),]
+    rows = which(as.character(d$Q_cutoff)==Q_cutoff)
+    d = d[rows,]
     
     total.bases = sum(as.numeric(d$sequence_length_template))
     N50.length = d$sequence_length_template[min(which(d$cumulative.bases > (total.bases/2)))]
