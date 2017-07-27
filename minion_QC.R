@@ -214,7 +214,7 @@ ggplot(subset(d, sequence_length_template >= 1), aes(x = sequence_length_templat
 dev.off()
 
 print("Plotting Q score over time")
-png(filename = file.path(output.dir, "qscore_by_hour.png"), width = 960, height = 960)
+png(filename = file.path(output.dir, "q_by_hour.png"), width = 960, height = 960)
 ggplot(d, aes(x = mean_qscore_template, y = hour, group = hour, fill = reads_per_hour)) + 
     geom_joy(scale = 3, alpha = 0.8) + 
     scale_x_continuous(expand = c(0.01, 0)) + 
