@@ -76,8 +76,16 @@ Events per base (i.e. numbe of events for each read, divided by the number of ba
 ![epb_histogram](example_output/epb_histogram.png)
 
 ### length_vs_q.png
-Read length (log10 scale) on the X axis, mean Q score on the Y axis. Points are coloured by the events per base, scaled such that all events per base >10 are recorded as a 10. The latter makes it easier to distinguish 'good' and 'bad' reads. 
+Read length (log10 scale) on the X axis, mean Q score on the Y axis. Points are coloured by the events per base, scaled such that all events per base >10 are recorded as a 10. The latter makes it easier to distinguish 'good' reads (~1.5 events per base) from 'bad' reads (>>1.5 events per base).
 ![length_vs_q](example_output/length_vs_q.png)
+
+### length_per_hour.png
+The read length density distribution (x axis) plotted for each hour of the run (y axis). Time runs from hour zero at the top, to the final hour of the run at the bottom. Since density plots do not intrinsically tell you anything about the number of reads, the number of reads is given by the fill colour. This can show some interesting patterns e.g.: that most of the good data in the run below came in the first ~10 hours; that the new mux at 8 hours led to a decent increase in the number of good reads; and that most of the longest good reads (>40kbp) also came in the first few hours.  
+![length_per_hour](example_output/length_per_hour.png)
+
+### length_per_hour.png
+The q score density distribution (x axis) plotted for each hour of the run (y axis). Time runs from hour zero at the top, to the final hour of the run at the bottom. Since density plots do not intrinsically tell you anything about the number of reads, the number of reads is given by the fill colour.   
+![q_per_hour](example_output/q_per_hour.png)
 
 ### yield_summary.png
 Minimum read length on the X axis, and the yield of bases with reads at least that long on the Y axis. This is just like the 'reads' table in the `summary.txt` output, but done across all read lengths up to 100KB. I cut off at 100KB because you (probably) don't have most of your data at those lenghts. Good on you if you do though.
