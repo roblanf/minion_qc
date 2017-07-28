@@ -26,6 +26,7 @@ install.packages("ggplot2")
 install.packages("viridis")
 install.packages("reshape2")
 install.packages("plyr")
+install.packages("ggjoy")
 ```
 
 ## Output details
