@@ -27,6 +27,7 @@ install.packages("viridis")
 install.packages("reshape2")
 install.packages("plyr")
 install.packages("ggjoy")
+install.packages("purrr")
 ```
 
 ## Output details
