@@ -179,7 +179,7 @@ dev.off()
 print("Plotting flowcell channels events per base plot")
 png(filename = file.path(output.dir, "flowcell_channels_epb.png"), width = 2400, height = 2400)
 ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=events_per_base, colour = mean_qscore_template)) + 
-    geom_point(size=1, alpha=0.5) + 
+    geom_point(size=1.5, alpha=0.35) + 
     scale_colour_viridis() + 
     scale_y_log10(limits=c(1e+0, 1e+01)) + 
     facet_grid(row~col) +
