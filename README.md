@@ -34,11 +34,11 @@ install.packages("data.table")
 ```
 
 ## Output details
-More details on rationale are in [this blog post](robertlanfear.com/blog/files/nanopore_performance.html), example output is in the `/example_output` folder of this repository.
+More details on rationale are in [this blog post](http://robertlanfear.com/blog/files/nanopore_performance.html), example output is in the `/example_output` folder of this repository.
 
 ### summary.yaml
 
-Simple text summary of the data in yaml format (opens in any text editor, but can also be read by any coding language). Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB, following the definition given in [this preprint](biorxiv.org/content/early/2017/04/20/128835). Here's the first part of the example file:
+Simple text summary of the data in yaml format (opens in any text editor, but can also be read by any coding language). Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB, following the definition given in [this preprint](http://biorxiv.org/content/early/2017/04/20/128835). Here's the first part of the example file:
 
 ```yaml
 input file: ~/Desktop/sequencing_summary.txt
@@ -77,7 +77,7 @@ Mean Q score for a read on the X axis, and counts on the Y axis.
 ![q_histogram](example_output/q_histogram.png)
 
 ### epb_histogram.png
-Events per base (i.e. numbe of events for each read, divided by the number of bases called for that read) on the X axis, and counts on the Y axis. We have found this measure to be potentially useful in finding dodgy reads, see robertlanfear.com/blog/files/nanopore_performance.html for more.
+Events per base (i.e. numbe of events for each read, divided by the number of bases called for that read) on the X axis, and counts on the Y axis. We have found this measure to be potentially useful in finding dodgy reads, see http://robertlanfear.com/blog/files/nanopore_performance.html for more.
 ![epb_histogram](example_output/epb_histogram.png)
 
 ### length_vs_q.png
