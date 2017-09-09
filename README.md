@@ -11,12 +11,13 @@ Because other tools focus on getting data out of the fastq or fast5 files, which
 ## Quick start
 
 ```
-Rscript minion_QC.R sequencing_summary.txt output_directory
+Rscript minion_QC.R sequencing_summary.txt output_directory q_score_cutoff
 ```
 
 * *minion_QC.R*: path to this script
 * *sequencing_summary.txt*: path to a sequencing_summary.txt file from Albacore
 * *output_directory*: path to an output directory. Files will be overwritten.
+* *q_score_cutoff*: a q_score cutoff value for reads that you might throw out. Albacore 2.0 defaults to 7 for this. On our data a value of 8 looks a little more sensible.
 
 ## Dependencies
 A recent version of R, and install the following:
@@ -28,6 +29,8 @@ install.packages("reshape2")
 install.packages("plyr")
 install.packages("ggjoy")
 install.packages("purrr")
+install.packages("scales")
+install.packages("data.table")
 ```
 
 ## Output details
@@ -38,35 +41,35 @@ More details on rationale are in [this blog post](robertlanfear.com/blog/files/n
 Simple text summary of the data in yaml format (opens in any text editor, but can also be read by any coding language). Ultralong reads are defined as the maximum possible fraction of the data that has an N50>100KB, following the definition given in [this preprint](biorxiv.org/content/early/2017/04/20/128835). Here's the first part of the example file:
 
 ```yaml
-input file: /Users/roblanfear/Desktop/sequencing_summary.txt
+input file: ~/Desktop/sequencing_summary.txt
 All reads:
-  total.gigabases: 3.8433736
-  N50.length: 34354.0
-  mean.length: 16150.1
-  median.length: 7176.0
-  max.length: 826249.0
-  mean.q: 9.5
-  median.q: 10.1
+  total.gigabases: 3.527993
+  N50.length: 34625.0
+  mean.length: 14797.3
+  median.length: 5852.0
+  max.length: 208407.0
+  mean.q: 7.9
+  median.q: 9.0
   reads:
-    '>20kb': 83614
-    '>50kb': 14651
-    '>100kb': 253
-    '>200kb': 10
-    '>500kb': 1
+    '>20kb': 80309
+    '>50kb': 13325
+    '>100kb': 181
+    '>200kb': 1
+    '>500kb': 0
     '>1m': 0
-    ultralong: 574
+    ultralong: 390
   gigabases:
-    '>20kb': 3.113988
-    '>50kb': 0.9333141
-    '>100kb': 0.0303313
-    '>200kb': 0.0030453
-    '>500kb': 0.0008262
+    '>20kb': 2.949691
+    '>50kb': 0.8406423
+    '>100kb': 0.0199968
+    '>200kb': 0.0002084
+    '>500kb': 0.0e+00
     '>1m': 0.0e+00
-    ultralong: 0.0606444
+    ultralong: 0.0399325
 ```
 
 ### length_histogram.png
-Read length, on a log10 scale, on the X axis, and counts on the Y axis.
+Read length, on a log10 scale, on the X axis, and read counts on the Y axis.
 ![length_histogram](example_output/length_histogram.png)
 
 ### q_histogram.png
@@ -78,14 +81,14 @@ Events per base (i.e. numbe of events for each read, divided by the number of ba
 ![epb_histogram](example_output/epb_histogram.png)
 
 ### length_vs_q.png
-Read length (log10 scale) on the X axis, mean Q score on the Y axis. Points are coloured by the events per base, scaled such that all events per base >10 are recorded as a 10. The latter makes it easier to distinguish 'good' reads (~1.5 events per base) from 'bad' reads (>>1.5 events per base).
+Read length (log10 scale) on the X axis, mean Q score on the Y axis. Points are coloured by the events per base. 'Good' reads are ~1.5 events per base, and 'bad' reads are >>1.5 events per base. We often see a group of very short 'bad' reads.
 ![length_vs_q](example_output/length_vs_q.png)
 
 ### length_per_hour.png
 The read length density distribution (x axis) plotted for each hour of the run (y axis). Time runs from hour zero at the top, to the final hour of the run at the bottom. Since density plots do not intrinsically tell you anything about the number of reads, the number of reads is given by the fill colour. This can show some interesting patterns e.g.: that most of the good data in the run below came in the first ~10 hours; that the new mux at 8 hours led to a decent increase in the number of good reads; and that most of the longest good reads (>40kbp) also came in the first few hours.  
 ![length_per_hour](example_output/length_per_hour.png)
 
-### length_per_hour.png
+### q_per_hour.png
 The q score density distribution (x axis) plotted for each hour of the run (y axis). Time runs from hour zero at the top, to the final hour of the run at the bottom. Since density plots do not intrinsically tell you anything about the number of reads, the number of reads is given by the fill colour.   
 ![q_per_hour](example_output/q_per_hour.png)
 
@@ -100,3 +103,7 @@ Histograms of total bases, total reads, mean read length, and median read length
 ### flowcell_channels_epb.png
 This one's busy, but hopefully useful. The 512 channels are laid out as on the R9.5 flowcell. Then each sub-panel of the plot simply plots out the time of the run in hours on the X axis, and the events per base (log scale, cut off at 10 events per base) on the Y axis. The colour is the mean Q score of each read - blue is low, green is high. This gives a little insight into exactly what was going on in each of your channels over the course of the run. Blow it up big! What you want is lots of green (high quality) reads, being consistently produced in each channel, and with a consistently low events-per-base score (Y axis, indicating that the reads are not stalling in the pores).
 ![flowcell_channels_epb](example_output/flowcell_channels_epb.png)
+
+### flowcell_channels_readlength.png
+As above, but now the read length is on the Y axis
+![flowcell_channels_readlength](example_output/flowcell_channels_readlength.png)

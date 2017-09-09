@@ -1,10 +1,10 @@
-#!/usr/bin/env
+#!/usr/bin/Rscript
 
 args<-commandArgs(TRUE)
 
 input.file = args[1]
 output.dir = args[2]
-q = args[3]
+q = as.numeric(as.character(args[3]))
 
 
 q_title = paste("Reads with mean Q score >", q)
@@ -55,7 +55,7 @@ add_cols <- function(d, min.q){
 }
 
 
-load_summary <- function(filepath, min.q=c(-Inf, q)){
+load_summary <- function(filepath, min.q){
     # load a sequencing summary and add some info
     # min.q is a vector of length 2 defining 2 levels of min.q to have
     d = read.delim(filepath)
@@ -159,14 +159,13 @@ channel.summary <- function(d){
 # supress warnings
 options(warn=-1)
 
-
 print("Creating output directory")
 dir.create(output.dir)
 out.txt = file.path(output.dir, "summary.yaml")
 
 # write summaries
 print("Loading and summarising input file")
-d = load_summary(input.file)
+d = load_summary(input.file, min.q=c(-Inf, q))
 all.reads.summary = summary.stats(d, Q_cutoff = "All reads")
 q10.reads.summary = summary.stats(d, Q_cutoff = q_title)
 
@@ -257,15 +256,18 @@ ggplot(d, aes(x = mean_qscore_template, y = hour, group = hour, fill = reads_per
 dev.off()
 
 print("Plotting read length vs. q score scatterplot")
-d$events_per_base[which(d$events_per_base>10)] = 10
 png(filename = file.path(output.dir, "length_vs_q.png"), width = 960, height = 960)
-ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = log(events_per_base))) + geom_point(alpha=0.05, size = 0.4) + scale_x_log10(breaks=c(1e+01, 1e+02, 1e+03,1e+04,1e+05,1e+06)) + scale_colour_viridis() + theme(text = element_text(size = 15))
+ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+    geom_point(alpha=0.05, size = 0.4) + 
+    scale_x_log10(minor_breaks=log10_minor_break()) + 
+    scale_colour_viridis(trans = "log", labels = scientific) + 
+    theme(text = element_text(size = 15))
 dev.off()
 
 print("Plotting flowcell channels summary histograms")
 png(filename = file.path(output.dir, "channel_summary.png"), width = 2400, height = 960) 
 c = channel.summary(subset(d, Q_cutoff=="All reads"))
-c10 = channel.summary(subset(d, Q_cutoff=="Reads with mean Q score > 10"))
+c10 = channel.summary(subset(d, Q_cutoff==q_title))
 c$Q_cutoff = "All reads"
 c10$Q_cutoff = q_title
 cc = rbind(c, c10)
