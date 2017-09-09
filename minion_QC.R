@@ -6,7 +6,6 @@ input.file = args[1]
 output.dir = args[2]
 q = as.numeric(as.character(args[3]))
 
-
 q_title = paste("Reads with mean Q score >", q)
 
 # look at albacore's sequencing summary file
@@ -206,7 +205,6 @@ ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=events_per_bas
     theme(legend.position="none") +
     theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12))
 dev.off()
-
 
 print("Plotting flowcell channels read lengths plot")
 png(filename = file.path(output.dir, "flowcell_channels_readlength.png"), width = 2400, height = 2400)
