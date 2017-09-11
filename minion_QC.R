@@ -158,117 +158,224 @@ channel.summary <- function(d){
 # supress warnings
 options(warn=-1)
 
-print("Creating output directory")
-dir.create(output.dir)
-out.txt = file.path(output.dir, "summary.yaml")
-
-# write summaries
-print("Loading and summarising input file")
-d = load_summary(input.file, min.q=c(-Inf, q))
-all.reads.summary = summary.stats(d, Q_cutoff = "All reads")
-q10.reads.summary = summary.stats(d, Q_cutoff = q_title)
-
-summary = list("input file" = input.file,
-               "All reads" = all.reads.summary,
-               cutoff = q10.reads.summary,
-               "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
-
-names(summary)[3] = q_title
-
-write(as.yaml(summary), out.txt)
-
-# make plots
-print("Plotting length histogram")
-png(filename = file.path(output.dir, "length_histogram.png"), width = 960, height = 960)
-ggplot(d, aes(x = sequence_length_template)) + geom_histogram(bins = 300) + scale_x_log10(minor_breaks=log10_minor_break()) + facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + theme(text = element_text(size = 15))
-dev.off()
-
-print("Plotting mean Q score histogram")
-png(filename = file.path(output.dir, "q_histogram.png"), width = 960, height = 960)
-ggplot(d, aes(x = mean_qscore_template)) + geom_histogram(bins = 300) + facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + theme(text = element_text(size = 15))
-dev.off()
-
-print("Plotting events per base histogram")
-png(filename = file.path(output.dir, "epb_histogram.png"), width = 960, height = 960)
-ggplot(d, aes(x = events_per_base)) + geom_histogram(bins = 300) + scale_x_log10(minor_breaks=log10_minor_break()) + facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + theme(text = element_text(size = 15))
-dev.off()
-
-print("Plotting flowcell channels events per base plot")
-png(filename = file.path(output.dir, "flowcell_channels_epb.png"), width = 2400, height = 2400)
-ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=events_per_base, colour = mean_qscore_template)) + 
-    geom_point(size=1.5, alpha=0.35) + 
-    scale_colour_viridis() + 
-    scale_y_log10(limits=c(1e+0, 1e+03)) + 
-    facet_grid(row~col) +
-    theme(panel.spacing = unit(0.5, "lines")) +
-    xlab("Hours into run") +
-    theme(legend.position="none") +
-    theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12))
-dev.off()
-
-print("Plotting flowcell channels read lengths plot")
-png(filename = file.path(output.dir, "flowcell_channels_readlength.png"), width = 2400, height = 2400)
-ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
-    geom_point(size=1.5, alpha=0.35) + 
-    scale_colour_viridis() + 
-    scale_y_log10() + 
-    facet_grid(row~col) +
-    theme(panel.spacing = unit(0.5, "lines")) +
-    xlab("Hours into run") +
-    theme(legend.position="none") +
-    theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12))
-dev.off()
-
-print("Plotting flowcell yield summary")
-png(filename = file.path(output.dir, "yield_summary.png"), width = 960, height = 960)
-ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
-    geom_line(size = 1) + 
-    scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
-    xlab("Minimum read length") +
-    ylab("Total yield in bases") +
-    theme(text = element_text(size = 15))
-dev.off()
 
 
-print("Plotting sequence length over time")
-png(filename = file.path(output.dir, "length_by_hour.png"), width = 960, height = 960)
-upper.limit = signif(quantile(subset(d, Q_cutoff=="All reads")[,sequence_length_template], probs = 0.95), 1)
-ggplot(subset(d, sequence_length_template >= 1), aes(x = sequence_length_template, y = hour, group = hour, fill = reads_per_hour)) + 
-    geom_joy(scale = 2, alpha = 0.8) + 
-    scale_x_continuous(expand = c(0.01, 0), limits = c(0, upper.limit), labels = scientific) + 
-    scale_y_reverse(expand = c(0.01, 0)) + 
-    facet_wrap(~Q_cutoff, ncol = 1) +
-    theme(text = element_text(size = 15)) +
-    scale_fill_viridis()
-dev.off()
+single.flowcell <- function(input.file, output.dir, q){
 
-print("Plotting Q score over time")
-png(filename = file.path(output.dir, "q_by_hour.png"), width = 960, height = 960)
-ggplot(d, aes(x = mean_qscore_template, y = hour, group = hour, fill = reads_per_hour)) + 
-    geom_joy(scale = 3, alpha = 0.8) + 
-    scale_x_continuous(expand = c(0.01, 0)) + 
-    scale_y_reverse(expand = c(0.01, 0)) + 
-    facet_wrap(~Q_cutoff, ncol = 1) +
-    theme(text = element_text(size = 15)) +
-    scale_fill_viridis()
-dev.off()
+    print("Creating output directory")
+    dir.create(output.dir)
+    out.txt = file.path(output.dir, "summary.yaml")
+    
+    # write summaries
+    print(paste("Loading and summarising input file, saving to:", out.txt))
 
-print("Plotting read length vs. q score scatterplot")
-png(filename = file.path(output.dir, "length_vs_q.png"), width = 960, height = 960)
-ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
-    geom_point(alpha=0.05, size = 0.4) + 
-    scale_x_log10(minor_breaks=log10_minor_break()) + 
-    scale_colour_viridis(trans = "log", labels = scientific) + 
-    theme(text = element_text(size = 15))
-dev.off()
+    d = load_summary(input.file, min.q=c(-Inf, q))
+    all.reads.summary = summary.stats(d, Q_cutoff = "All reads")
+    q10.reads.summary = summary.stats(d, Q_cutoff = q_title)
+    
+    summary = list("input file" = input.file,
+                   "All reads" = all.reads.summary,
+                   cutoff = q10.reads.summary,
+                   "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
+    
+    names(summary)[3] = q_title
+    
+    write(as.yaml(summary), out.txt)
+    
+    # make plots
+    print("Plotting length histogram")
+    p1 = ggplot(d, aes(x = sequence_length_template)) + 
+        geom_histogram(bins = 300) + 
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
 
-print("Plotting flowcell channels summary histograms")
-png(filename = file.path(output.dir, "channel_summary.png"), width = 2400, height = 960) 
-c = channel.summary(subset(d, Q_cutoff=="All reads"))
-c10 = channel.summary(subset(d, Q_cutoff==q_title))
-c$Q_cutoff = "All reads"
-c10$Q_cutoff = q_title
-cc = rbind(c, c10)
-ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + facet_grid(Q_cutoff~variable, scales="free") + theme(text = element_text(size = 20))
-dev.off()
+    print("Plotting mean Q score histogram")
+    p2 = ggplot(d, aes(x = mean_qscore_template)) + 
+        geom_histogram(bins = 300) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
 
+    print("Plotting events per base histogram")
+    p3 = ggplot(d, aes(x = events_per_base)) + 
+        geom_histogram(bins = 300) + 
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
+    
+    print("Plotting flowcell channels events per base plot")
+    p4 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=events_per_base, colour = mean_qscore_template)) + 
+        geom_point(size=1.5, alpha=0.35) + 
+        scale_colour_viridis() + 
+        scale_y_log10(limits=c(1e+0, 1e+03)) + 
+        facet_grid(row~col) +
+        theme(panel.spacing = unit(0.5, "lines")) +
+        xlab("Hours into run") +
+        theme(legend.position="none") +
+        theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12))
+    ggsave(filename = file.path(output.dir, "flowcell_channels_epb.png"), width = 2400/75, height = 2400/75, plot = p4)
+    
+    
+    print("Plotting flowcell channels read lengths plot")
+    p5 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
+        geom_point(size=1.5, alpha=0.35) + 
+        scale_colour_viridis() + 
+        scale_y_log10() + 
+        facet_grid(row~col) +
+        theme(panel.spacing = unit(0.5, "lines")) +
+        xlab("Hours into run") +
+        theme(legend.position="none") +
+        theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12))
+    ggsave(filename = file.path(output.dir, "flowcell_channels_readlength.png"), width = 2400/75, height = 2400/75, plot = p5)
+    
+    
+    print("Plotting flowcell yield summary")
+    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
+        geom_line(size = 1) + 
+        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
+        xlab("Minimum read length") +
+        ylab("Total yield in bases") +
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
+    
+    
+    print("Plotting sequence length over time")
+    upper.limit = signif(quantile(subset(d, Q_cutoff=="All reads")[,sequence_length_template], probs = 0.95), 1)
+    p7 = ggplot(subset(d, sequence_length_template >= 1), aes(x = sequence_length_template, y = hour, group = hour, fill = reads_per_hour)) + 
+        geom_joy(scale = 2, alpha = 0.8) + 
+        scale_x_continuous(expand = c(0.01, 0), limits = c(0, upper.limit), labels = scientific) + 
+        scale_y_reverse(expand = c(0.01, 0)) + 
+        facet_wrap(~Q_cutoff, ncol = 1) +
+        theme(text = element_text(size = 15)) +
+        scale_fill_viridis()
+    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 960/75, plot = p7)
+    
+    
+    print("Plotting Q score over time")
+    p8 = ggplot(d, aes(x = mean_qscore_template, y = hour, group = hour, fill = reads_per_hour)) + 
+        geom_joy(scale = 3, alpha = 0.8) + 
+        scale_x_continuous(expand = c(0.01, 0)) + 
+        scale_y_reverse(expand = c(0.01, 0)) + 
+        facet_wrap(~Q_cutoff, ncol = 1) +
+        theme(text = element_text(size = 15)) +
+        scale_fill_viridis()
+    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 960/75, plot = p8)
+    
+    
+    print("Plotting read length vs. q score scatterplot")
+    p9 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+        geom_point(alpha=0.05, size = 0.4) + 
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        scale_colour_viridis(trans = "log", labels = scientific) + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p9)
+    
+    print("Plotting flowcell channels summary histograms")
+    c = channel.summary(subset(d, Q_cutoff=="All reads"))
+    c10 = channel.summary(subset(d, Q_cutoff==q_title))
+    c$Q_cutoff = "All reads"
+    c10$Q_cutoff = q_title
+    cc = rbind(c, c10)
+    p10 = ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + 
+        facet_grid(Q_cutoff~variable, scales="free") + 
+        theme(text = element_text(size = 20))
+    ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 2400/75, height = 960/75, plot = p10) 
+    
+    # add the flowcell to d
+    flowcell = basename(dirname(input.file))
+    
+    return(d)
+}
+
+multi.flowcell = function(input.file, output.base, q){
+    
+    dir.create(output.base)
+    flowcell = basename(dirname(input.file))
+    output.dir = file.path(output.base, flowcell, "minionQC")
+    d = single.flowcell(input.file, output.dir, q)
+    
+}
+
+
+multi.plots = function(dm, output.dir){
+    
+    # make plots
+    print("")
+    print("**** Making combined plots ****")
+    print("Plotting multi length distributions")
+    p1 = ggplot(dm, aes(x = sequence_length_template)) + 
+        geom_density(aes(colour = flowcell, y = ..count..)) + ylab("relative read count") +
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "length_distributions.png"), width = 960/75, height = 960/75, plot = p1)
+    
+    print("Plotting mean Q score distributions")
+    p2 = ggplot(dm, aes(x = mean_qscore_template)) + 
+        geom_density(aes(colour = flowcell, y = ..count..)) + ylab("relative read count") +
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "q_distributions.png"), width = 960/75, height = 960/75, plot = p2)
+    
+    print("Plotting events per base distributions")
+    p3 = ggplot(dm, aes(x = events_per_base)) + 
+        geom_density(aes(colour = flowcell, y = ..count..)) + ylab("relative read count") +
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "epb_distributions.png"), width = 960/75, height = 960/75, plot = p3)
+    
+
+    print("Plotting flowcell yield summary")
+    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
+        geom_line(size = 1, alpha = 0.75) + 
+        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
+        xlab("Minimum read length") +
+        ylab("Total yield in bases") +
+        theme(text = element_text(size = 15)) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
+    ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
+    
+    print("Plotting read length vs. q score scatterplot")
+    point.size = 0.04 / length(unique(dm$flowcell))
+    point.alpha = point.size
+    p9 = ggplot(subset(dm, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+        geom_point(alpha=point.alpha, size = point.size) + 
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        scale_colour_viridis(trans = "log", labels = scientific) + 
+        theme(text = element_text(size = 15)) + 
+        facet_wrap(~flowcell)
+    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p9)
+    
+    
+}
+
+
+
+if(file_test("-f", input.file)==TRUE){
+    # if it's an existing file (not a folder) just run one analysis
+    d = single.flowcell(input.file, output.dir, q)
+}else if(file_test("-d", input.file)==TRUE){
+    # it's a directory, recursively analyse all sequencing_summary.txt files
+  
+    # get a list of all sequencing_summary.txt files, recursively
+    summaries = list.files(path = input.file, pattern = "sequencing_summary.txt", recursive = TRUE, full.names = TRUE)
+      
+    # analyse each one and keep the returns in a list
+    print("")
+    print("**** Analysing each input file from this list ****")
+    print(summaries)
+    results = lapply(summaries, multi.flowcell, output.dir, q)
+
+    # rbind that list
+    dm = do.call("rbind", results)
+
+    multi.plots(dm, output.dir)
+    
+}else{
+    #WTF
+    warning("Could find a sequencing summary file in your input. The input must be either a sequencing_summary.txt file, or a directory containing one or more such files")
+}
