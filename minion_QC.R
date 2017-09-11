@@ -160,7 +160,7 @@ options(warn=-1)
 
 
 
-single.flowcell <- function(input.file, output.dir, q){
+single.flowcell <- function(input.file, output.dir, q=8){
 
     print("Creating output directory")
     dir.create(output.dir)
@@ -341,7 +341,7 @@ multi.plots = function(dm, output.dir){
     
     print("Plotting read length vs. q score scatterplot")
     point.size = 0.04 / length(unique(dm$flowcell))
-    point.alpha = point.size
+    point.alpha = 0.04 / (length(unique(dm$flowcell)) * 0.5)
     p9 = ggplot(subset(dm, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=point.alpha, size = point.size) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
