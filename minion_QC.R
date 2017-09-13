@@ -6,7 +6,7 @@ input.file = args[1]
 output.dir = args[2]
 q = as.numeric(as.character(args[3]))
 
-q_title = paste("Reads with mean Q score >", q)
+q_title = paste("Reads with mean Q score >=", q)
 
 # look at albacore's sequencing summary file
 library(ggplot2)
@@ -49,7 +49,10 @@ add_cols <- function(d, min.q){
     d$hour = d$start_time %/% 3600
     
     # add the reads generated for each hour
-    setDT(d)[, reads_per_hour := sum(which(sequence_length_template>=1)), by = hour] 
+    reads.per.hour = as.data.frame(table(d$hour))
+    names(reads.per.hour) = c("hour", "reads_per_hour")
+    reads.per.hour$hour = as.numeric(as.character(reads.per.hour$hour))
+    d = merge(d, reads.per.hour, by = c("hour"))    
     return(d)
 }
 
@@ -164,6 +167,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
 
     print("Creating output directory")
     dir.create(output.dir)
+    print(paste("Saving output to", output.dir))
     out.txt = file.path(output.dir, "summary.yaml")
     
     # write summaries
@@ -243,35 +247,65 @@ single.flowcell <- function(input.file, output.dir, q=8){
     
     
     print("Plotting sequence length over time")
-    upper.limit = signif(quantile(subset(d, Q_cutoff=="All reads")[,sequence_length_template], probs = 0.95), 1)
-    p7 = ggplot(subset(d, sequence_length_template >= 1), aes(x = sequence_length_template, y = hour, group = hour, fill = reads_per_hour)) + 
-        geom_joy(scale = 2, alpha = 0.8) + 
-        scale_x_continuous(expand = c(0.01, 0), limits = c(0, upper.limit), labels = scientific) + 
-        scale_y_reverse(expand = c(0.01, 0)) + 
-        facet_wrap(~Q_cutoff, ncol = 1) +
-        theme(text = element_text(size = 15)) +
-        scale_fill_viridis()
-    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 960/75, plot = p7)
+    e = subset(d, Q_cutoff=="All reads")
+    e$Q = paste(">=", q, sep="")
+    e$Q[which(e$mean_qscore_template<q)] = paste("<", q, sep="")
+    p7 = ggplot(e, aes(x=start_time/3600, y=sequence_length_template, colour = Q, group = Q)) + 
+        geom_smooth() + 
+        xlab("Hours into run") + 
+        ylab("Mean read length") + 
+        ylim(0, NA)
+    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
     
     
     print("Plotting Q score over time")
-    p8 = ggplot(d, aes(x = mean_qscore_template, y = hour, group = hour, fill = reads_per_hour)) + 
-        geom_joy(scale = 3, alpha = 0.8) + 
-        scale_x_continuous(expand = c(0.01, 0)) + 
-        scale_y_reverse(expand = c(0.01, 0)) + 
-        facet_wrap(~Q_cutoff, ncol = 1) +
-        theme(text = element_text(size = 15)) +
-        scale_fill_viridis()
-    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 960/75, plot = p8)
+    p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = Q, group = Q)) + 
+        geom_smooth() + 
+        xlab("Hours into run") + 
+        ylab("Mean Q score") + 
+        ylim(0, NA)
+    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
     
+
+    print("Plotting number of reads over time")
+    f = d[c("hour", "reads_per_hour", "Q_cutoff")]
+    f = f[!duplicated(f),]
+    g = subset(f, Q_cutoff=="All reads")
+    h = subset(f, Q_cutoff==q_title)
+    max = max(f$hour)
+    all = 0:max
+    add.g = all[which(all %in% g$hour == FALSE)]
+    if(length(add.g)>0){
+        add.g = data.frame(hour = add.g, reads_per_hour = 0, Q_cutoff = "All reads")
+        g = rbind(g, add.g)
+    }
     
+    add.h = all[which(all %in% h$hour == FALSE)]
+    if(length(add.h)>0){
+        add.h = data.frame(hour = add.h, reads_per_hour = 0, Q_cutoff = q_title)
+        h = rbind(h, add.h)
+    }
+    
+    i = rbind(g, h)
+    i$Q_cutoff = as.character(i$Q_cutoff)
+    i$Q_cutoff[which(i$Q_cutoff==q_title)] = paste("Q>=", q, sep="")
+    p9 = ggplot(i, aes(x=hour, y=reads_per_hour, colour = Q_cutoff, group = Q_cutoff)) + 
+        geom_point() +
+        geom_line() +
+        xlab("Hours into run") + 
+        ylab("Number of reads per hour") + 
+        ylim(0, NA) + 
+        scale_color_discrete(guide = guide_legend(title = "Reads"))
+    ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = 960/75, height = 480/75, plot = p9)
+    
+        
     print("Plotting read length vs. q score scatterplot")
-    p9 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+    p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=0.05, size = 0.4) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
         scale_colour_viridis(trans = "log", labels = scientific) + 
         theme(text = element_text(size = 15))
-    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p9)
+    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p10)
     
     print("Plotting flowcell channels summary histograms")
     c = channel.summary(subset(d, Q_cutoff=="All reads"))
@@ -279,10 +313,10 @@ single.flowcell <- function(input.file, output.dir, q=8){
     c$Q_cutoff = "All reads"
     c10$Q_cutoff = q_title
     cc = rbind(c, c10)
-    p10 = ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + 
+    p11 = ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + 
         facet_grid(Q_cutoff~variable, scales="free") + 
         theme(text = element_text(size = 20))
-    ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 2400/75, height = 960/75, plot = p10) 
+    ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 2400/75, height = 960/75, plot = p11) 
     
     # add the flowcell to d
     flowcell = basename(dirname(input.file))
@@ -292,8 +326,10 @@ single.flowcell <- function(input.file, output.dir, q=8){
 
 multi.flowcell = function(input.file, output.base, q){
     
+    print(paste("Creating folder", output.base))
     dir.create(output.base)
     flowcell = basename(dirname(input.file))
+    dir.create(file.path(output.base, flowcell))
     output.dir = file.path(output.base, flowcell, "minionQC")
     d = single.flowcell(input.file, output.dir, q)
     
@@ -339,6 +375,29 @@ multi.plots = function(dm, output.dir){
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
     
+
+    print("Plotting sequence length over time")
+    e = subset(dm, Q_cutoff=="All reads")
+    e$Q = paste(">=", q, sep="")
+    e$Q[which(e$mean_qscore_template<q)] = paste("<", q, sep="")
+    p7 = ggplot(e, aes(x=start_time/3600, y=sequence_length_template, colour = flowcell)) + 
+        geom_smooth() + 
+        xlab("Hours into run") + 
+        ylab("Mean read length") + 
+        ylim(0, NA) +
+        facet_wrap(~Q, ncol = 1, scales = "free_y")
+    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
+    
+
+    print("Plotting Q score over time")
+    p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = flowcell)) + 
+        geom_smooth() + 
+        xlab("Hours into run") + 
+        ylab("Mean Q score") + 
+        facet_wrap(~Q, ncol = 1, scales = "free_y")
+    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
+    
+        
     print("Plotting read length vs. q score scatterplot")
     point.size = 0.04 / length(unique(dm$flowcell))
     point.alpha = 0.04 / (length(unique(dm$flowcell)) * 0.5)
