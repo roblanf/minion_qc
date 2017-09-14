@@ -5,8 +5,9 @@ args<-commandArgs(TRUE)
 input.file = args[1]
 output.dir = args[2]
 q = as.numeric(as.character(args[3]))
+cores = as.numeric(as.character(args[4]))
 
-q_title = paste("Reads with mean Q score >=", q)
+q_title = paste("Q>=", q, sep="")
 
 # look at albacore's sequencing summary file
 library(ggplot2)
@@ -14,9 +15,8 @@ library(viridis)
 library(plyr)
 library(reshape2)
 library(yaml)
-library(ggjoy)
 library(scales)
-library(data.table)
+library(parallel)
 
 # build the map for R9.5
 p1 = data.frame(channel=33:64, row=rep(1:4, each=8), col=rep(1:8, 4))
@@ -313,8 +313,14 @@ single.flowcell <- function(input.file, output.dir, q=8){
     c$Q_cutoff = "All reads"
     c10$Q_cutoff = q_title
     cc = rbind(c, c10)
+    cc$variable = as.character(cc$variable)
+    cc$variable[which(cc$variable=="total.bases")] = "Number of bases per channel"
+    cc$variable[which(cc$variable=="total.reads")] = "Number of reads per channel"
+    cc$variable[which(cc$variable=="mean.read.length")] = "Mean read length per channel"
+    cc$variable[which(cc$variable=="median.read.length")] = "Median read length per channel"
+    
     p11 = ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + 
-        facet_grid(Q_cutoff~variable, scales="free") + 
+        facet_grid(Q_cutoff~variable, scales = "free_x") + 
         theme(text = element_text(size = 20))
     ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 2400/75, height = 960/75, plot = p11) 
     
@@ -399,7 +405,7 @@ multi.plots = function(dm, output.dir){
     
         
     print("Plotting read length vs. q score scatterplot")
-    point.size = 0.04 / length(unique(dm$flowcell))
+    point.size = 0.02 / length(unique(dm$flowcell))
     point.alpha = 0.04 / (length(unique(dm$flowcell)) * 0.5)
     p9 = ggplot(subset(dm, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=point.alpha, size = point.size) + 
@@ -427,7 +433,7 @@ if(file_test("-f", input.file)==TRUE){
     print("")
     print("**** Analysing each input file from this list ****")
     print(summaries)
-    results = lapply(summaries, multi.flowcell, output.dir, q)
+    results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
 
     # rbind that list
     dm = do.call("rbind", results)
