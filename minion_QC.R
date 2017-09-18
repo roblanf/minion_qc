@@ -104,6 +104,7 @@ summary.stats <- function(d, Q_cutoff="All reads"){
     # Write summary stats for a single value of min.q
     rows = which(as.character(d$Q_cutoff)==Q_cutoff)
     d = d[rows,]
+    d = d[with(d, order(-sequence_length_template)), ] # sort by read length, just in case
     
     total.bases = sum(as.numeric(d$sequence_length_template))
     N50.length = d$sequence_length_template[min(which(d$cumulative.bases > (total.bases/2)))]
@@ -119,8 +120,12 @@ summary.stats <- function(d, Q_cutoff="All reads"){
         if(n < 100000){ break }
     }
     ultra.reads = as.integer(i-1)
-    ultra.gigabases = sum(as.numeric(d$sequence_length_template[1:ultra.reads]))/1000000000
-    
+    if(ultra.reads>=1){
+        ultra.gigabases = sum(as.numeric(d$sequence_length_template[1:ultra.reads]))/1000000000
+    }else{
+        ultra.gigabases = 0
+    }
+        
     reads = list(reads.gt(d, 20000), 
               reads.gt(d, 50000),
               reads.gt(d, 100000),
