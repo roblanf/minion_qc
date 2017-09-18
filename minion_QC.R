@@ -327,6 +327,83 @@ single.flowcell <- function(input.file, output.dir, q=8){
     return(d)
 }
 
+combined.flowcell <- function(d, output.dir, q=8){
+    
+    print("Creating output directory")
+    out.txt = file.path(output.dir, "summary.yaml")
+    
+    # write summaries
+    print(paste("Summarising combined data from all flowcells, saving to:", out.txt))
+
+    # tidy up and remove added stuff
+    d = subset(d, Q_cutoff = "All reads")    
+    drops = c("cumulative.bases", "hour", "reads.per.hour")
+    d = d[ , !(names(d) %in% drops)]
+    
+    d1 = add_cols(d, -Inf)
+    d1$Q_cutoff = "All reads"
+    
+    d2 = add_cols(d, q)
+    d2$Q_cutoff = q_title
+    
+    d = rbind(d1, d2)
+    d$Q_cutoff = as.factor(d$Q_cutoff)
+    
+    all.reads.summary = summary.stats(d, Q_cutoff = "All reads")
+    q10.reads.summary = summary.stats(d, Q_cutoff = q_title)
+    
+    summary = list("input file" = input.file,
+                   "All reads" = all.reads.summary,
+                   cutoff = q10.reads.summary,
+                   "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
+    
+    names(summary)[3] = q_title
+    
+    write(as.yaml(summary), out.txt)
+    
+    # make plots
+    print("Plotting length histogram")
+    p1 = ggplot(d, aes(x = sequence_length_template)) + 
+        geom_histogram(bins = 300) + 
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15)) +
+        xlab("Read length") +
+        ylab("Number of reads")
+    ggsave(filename = file.path(output.dir, "combined_length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
+    
+    print("Plotting mean Q score histogram")
+    p2 = ggplot(d, aes(x = mean_qscore_template)) + 
+        geom_histogram(bins = 300) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15)) +
+        xlab("Mean Q score of read") +
+        ylab("Number of reads")
+    ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
+    
+    print("Plotting events per base histogram")
+    p3 = ggplot(d, aes(x = events_per_base)) + 
+        geom_histogram(bins = 300) + 
+        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        theme(text = element_text(size = 15)) +
+        xlab("Mean number of events per base called in read") +
+        ylab("Number of reads")
+    ggsave(filename = file.path(output.dir, "combined_epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
+    
+    print("Plotting flowcell yield summary")
+    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
+        geom_line(size = 1) + 
+        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
+        xlab("Minimum read length") +
+        ylab("Total yield in bases") +
+        scale_colour_discrete(guide = guide_legend(title = "Reads")) +
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "combined_yield_summary.png"), width = 960/75, height = 960/75, plot = p4)
+    
+}
+
+
 multi.flowcell = function(input.file, output.base, q){
     
     print(paste("Creating folder", output.base))
@@ -407,22 +484,9 @@ multi.plots = function(dm, output.dir){
     ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
     
         
-    print("Plotting read length vs. q score scatterplot")
-    point.size = 0.02 / length(unique(dm$flowcell))
-    point.alpha = 0.04 / (length(unique(dm$flowcell)) * 0.5)
-    p9 = ggplot(subset(dm, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
-        geom_point(alpha=point.alpha, size = point.size) + 
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
-        scale_colour_viridis(trans = "log", labels = scientific) + 
-        labs(colour='Events per base\n(log scale)\n')  + 
-        theme(text = element_text(size = 15)) +
-        xlab("Read length") +
-        ylab("Mean Q score of read") + 
-        facet_wrap(~flowcell)
-    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p9)
-    
-
 }
+
+
 
 
 
@@ -444,7 +508,12 @@ if(file_test("-f", input.file)==TRUE){
     # rbind that list
     dm = do.call("rbind", results)
 
-    multi.plots(dm, output.dir)
+    # now do the single plot on ALL the output
+    combined.output = file.path(output.dir, "combinedQC")
+    combined.flowcell(dm, combined.output, q)
+    dir.create(combined.output)
+    multi.plots(dm, combined.output)
+    
     
 }else{
     #WTF
