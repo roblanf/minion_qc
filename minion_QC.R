@@ -41,8 +41,12 @@ q8 = data.frame(channel=65:96, row=rep(29:32, each=8), col=rep(16:9, 4))
 map = rbind(p1, p2, p3, p4, p5, p6, p7, p8, q1, q2, q3, q4, q5, q6, q7, q8)
 
 add_cols <- function(d, min.q){
-    # repeat take a sequencing sumamry file (d),
-    # return the same data frame with min.q and a cumulative.bases columns added
+    # take a sequencing sumamry file (d), and a minimum Q value you are interested in (min.q)
+    # return the same data frame with the following columns added 
+        # cumulative.bases
+        # hour of run
+        # reads.per.hour
+    
     d = subset(d, mean_qscore_template >= min.q)
     d = merge(d, map, by="channel")
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length
@@ -61,34 +65,50 @@ add_cols <- function(d, min.q){
 load_summary <- function(filepath, min.q){
     # load a sequencing summary and add some info
     # min.q is a vector of length 2 defining 2 levels of min.q to have
+    # by default the lowest value is -Inf, i.e. includes all reads. The 
+    # other value in min.q is set by the user at the command line
     d = read.delim(filepath)
     d$sequence_length_template = as.numeric(d$sequence_length_template)
     d$events_per_base = d$num_events_template/d$sequence_length_template
     
     flowcell = basename(dirname(filepath))
     
+    # add columns for all the reads
     d1 = add_cols(d, min.q[1])
     d1$Q_cutoff = "All reads"
     
+    # add columns for just the reads that pass the user Q threshold
     d2 = add_cols(d, min.q[2])
     d2$Q_cutoff = q_title
     
+    # bind those two together into one data frame
     d = as.data.frame(rbindlist(list(d1, d2)))
+
+    # name the flowcell (useful for analyses with >1 flowcell)
     d$flowcell = flowcell
+    
+    # make sure this is a factor
     d$Q_cutoff = as.factor(d$Q_cutoff)
     return(d)
 }
 
 reads.gt <- function(d, len){
+    # return the number of reads in data frame d
+    # that are at least as long as length len
     return(length(which(d$sequence_length_template>=len)))
 }
 
 bases.gt <- function(d, len){
-  reads = subset(d, sequence_length_template >= len)
-  return(sum(as.numeric(reads$sequence_length_template)))
+    # return the number of bases contained in reads from 
+    # data frame d
+    # that are at least as long as length len
+    reads = subset(d, sequence_length_template >= len)
+    return(sum(as.numeric(reads$sequence_length_template)))
 }
 
 log10_minor_break = function (...){
+    # function to add minor breaks to a log10 graph
+    # hat-tip: https://stackoverflow.com/questions/30179442/plotting-minor-breaks-on-a-log-scale-with-ggplot
     function(x) {
         minx         = floor(min(log10(x), na.rm=T))-1;
         maxx         = ceiling(max(log10(x), na.rm=T))+1;
@@ -104,6 +124,10 @@ log10_minor_break = function (...){
 
 binSearch <- function(min, max, df, t = 100000) {
     # binary search algorithm, thanks to https://stackoverflow.com/questions/46292438/optimising-a-calculation-on-every-cumulative-subset-of-a-vector-in-r/46303384#46303384
+    # the aim is to return the number of reads in a dataset (df)
+    # that comprise the largest subset of reads with an N50 of t
+    # we use this to calculte the number of 'ultra long' reads
+    # which are defined as those with N50 > 100KB
     mid = floor(mean(c(min, max)))
     if (mid == min) {
         if (df$sequence_length_template[min(which(df$cumulative.bases>df$cumulative.bases[min]/2))] < t) {
@@ -123,7 +147,8 @@ binSearch <- function(min, max, df, t = 100000) {
 
 
 summary.stats <- function(d, Q_cutoff="All reads"){
-    # Write summary stats for a single value of min.q
+    # Calculate summary stats for a single value of min.q
+    
     rows = which(as.character(d$Q_cutoff)==Q_cutoff)
     d = d[rows,]
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length, just in case
@@ -144,25 +169,28 @@ summary.stats <- function(d, Q_cutoff="All reads"){
         ultra.gigabases = 0
     }
         
-    reads = list(reads.gt(d, 20000), 
-              reads.gt(d, 50000),
-              reads.gt(d, 100000),
-              reads.gt(d, 200000),
-              reads.gt(d, 500000),
-              reads.gt(d, 1000000),
-              ultra.reads)
+    reads = list(
+                reads.gt(d, 10000), 
+                reads.gt(d, 20000), 
+                reads.gt(d, 50000),
+                reads.gt(d, 100000),
+                reads.gt(d, 200000),
+                reads.gt(d, 500000),
+                reads.gt(d, 1000000),
+                ultra.reads)
     names(reads) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
 
-    bases = list(bases.gt(d, 20000)/1000000000, 
-              bases.gt(d, 50000)/1000000000,
-              bases.gt(d, 100000)/1000000000,
-              bases.gt(d, 200000)/1000000000,
-              bases.gt(d, 500000)/1000000000,
-              bases.gt(d, 1000000)/1000000000,
-              ultra.gigabases)
+    bases = list(
+                bases.gt(d, 10000)/1000000000, 
+                bases.gt(d, 10000)/1000000000, 
+                bases.gt(d, 50000)/1000000000,
+                bases.gt(d, 100000)/1000000000,
+                bases.gt(d, 200000)/1000000000,
+                bases.gt(d, 500000)/1000000000,
+                bases.gt(d, 1000000)/1000000000,
+                ultra.gigabases)
     names(bases) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
     
-                
     return(list('total.gigabases' = total.bases/1000000000, 
                 'N50.length' = N50.length, 
                 'mean.length' = mean.length, 
@@ -176,7 +204,15 @@ summary.stats <- function(d, Q_cutoff="All reads"){
 }
 
 channel.summary <- function(d){
-    a = ddply(d, .(channel), summarize, total.bases = sum(sequence_length_template), total.reads = sum(which(sequence_length_template>=0)), mean.read.length = mean(sequence_length_template), median.read.length = median(sequence_length_template))
+    # calculate summaries of what happened in each of the channels 
+    # of a flowcell
+    
+    a = ddply(d, .(channel), 
+              summarize, 
+              total.bases = sum(sequence_length_template), 
+              total.reads = sum(which(sequence_length_template>=0)), 
+              mean.read.length = mean(sequence_length_template), 
+              median.read.length = median(sequence_length_template))
     b = melt(a, id.vars = c("channel"))
     return(b)    
 }
@@ -184,9 +220,11 @@ channel.summary <- function(d){
 # supress warnings
 options(warn=-1)
 
-
-
 single.flowcell <- function(input.file, output.dir, q=8){
+    # wrapper function to analyse data from a single flowcell
+    # input.file is a sequencing_summary.txt file from a 1D run
+    # output.dir is the output directory into which to write results
+    # q is the cutoff used for Q values, set by the user
 
     print("Creating output directory")
     dir.create(output.dir)
@@ -262,7 +300,6 @@ single.flowcell <- function(input.file, output.dir, q=8){
         theme(text = element_text(size = 15))
     ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
     
-    
     print("Plotting sequence length over time")
     e = subset(d, Q_cutoff=="All reads")
     e$Q = paste(">=", q, sep="")
@@ -274,7 +311,6 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylim(0, NA)
     ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
     
-    
     print("Plotting Q score over time")
     p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = Q, group = Q)) + 
         geom_smooth() + 
@@ -283,26 +319,24 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylim(0, NA)
     ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
     
-
     print("Plotting number of reads over time")
     f = d[c("hour", "reads_per_hour", "Q_cutoff")]
     f = f[!duplicated(f),]
     g = subset(f, Q_cutoff=="All reads")
     h = subset(f, Q_cutoff==q_title)
     max = max(f$hour)
+    # all of this is just to fill in hours with no reads recorded
     all = 0:max
     add.g = all[which(all %in% g$hour == FALSE)]
     if(length(add.g)>0){
         add.g = data.frame(hour = add.g, reads_per_hour = 0, Q_cutoff = "All reads")
         g = rbind(g, add.g)
     }
-    
     add.h = all[which(all %in% h$hour == FALSE)]
     if(length(add.h)>0){
         add.h = data.frame(hour = add.h, reads_per_hour = 0, Q_cutoff = q_title)
         h = rbind(h, add.h)
     }
-    
     i = rbind(g, h)
     i$Q_cutoff = as.character(i$Q_cutoff)
     i$Q_cutoff[which(i$Q_cutoff==q_title)] = paste("Q>=", q, sep="")
@@ -315,7 +349,6 @@ single.flowcell <- function(input.file, output.dir, q=8){
         scale_color_discrete(guide = guide_legend(title = "Reads"))
     ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = 960/75, height = 480/75, plot = p9)
     
-        
     print("Plotting read length vs. q score scatterplot")
     p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=0.05, size = 0.4) + 
@@ -338,19 +371,17 @@ single.flowcell <- function(input.file, output.dir, q=8){
     cc$variable[which(cc$variable=="total.reads")] = "Number of reads per channel"
     cc$variable[which(cc$variable=="mean.read.length")] = "Mean read length per channel"
     cc$variable[which(cc$variable=="median.read.length")] = "Median read length per channel"
-    
     p11 = ggplot(cc, aes(x = value)) + geom_histogram(bins = 30) + 
         facet_grid(Q_cutoff~variable, scales = "free_x") + 
         theme(text = element_text(size = 20))
     ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 2400/75, height = 960/75, plot = p11) 
     
-    # add the flowcell to d
-    flowcell = basename(dirname(input.file))
-    
     return(d)
 }
 
 combined.flowcell <- function(d, output.dir, q=8){
+    # function to analyse combined data from multiple flowcells
+    # useful for getting an overall impression of the combined data
     
     print("Creating output directory")
     out.txt = file.path(output.dir, "summary.yaml")
@@ -389,10 +420,9 @@ combined.flowcell <- function(d, output.dir, q=8){
     d$Q_cutoff = as.factor(d$Q_cutoff)
     d1 = 0
     d2 = 0
-    
         
     # make plots
-    print("Plotting length histogram")
+    print("Plotting combined length histogram")
     p1 = ggplot(d, aes(x = sequence_length_template)) + 
         geom_histogram(bins = 300) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -402,7 +432,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
     
-    print("Plotting mean Q score histogram")
+    print("Plotting combined mean Q score histogram")
     p2 = ggplot(d, aes(x = mean_qscore_template)) + 
         geom_histogram(bins = 300) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
@@ -411,7 +441,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
     
-    print("Plotting events per base histogram")
+    print("Plotting combined events per base histogram")
     p3 = ggplot(d, aes(x = events_per_base)) + 
         geom_histogram(bins = 300) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -421,7 +451,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
     
-    print("Plotting flowcell yield summary")
+    print("Plotting combined flowcell yield summary")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
@@ -435,6 +465,8 @@ combined.flowcell <- function(d, output.dir, q=8){
 
 
 multi.flowcell = function(input.file, output.base, q){
+    # wrapper function to allow parallelisation of single-flowcell 
+    # analyses when >1 flowcell is analysed in one run
     
     print(paste("Creating folder", output.base))
     dir.create(output.base)
@@ -448,6 +480,9 @@ multi.flowcell = function(input.file, output.base, q){
 
 
 multi.plots = function(dm, output.dir){
+    # function to plot data from multiple flowcells,
+    # where the data is not combined (as in combined.flowcell() )
+    # but instead just uses multiple lines on each plot.
     
     # make plots
     print("Plotting length distributions")
@@ -526,8 +561,7 @@ multi.plots = function(dm, output.dir){
 }
 
 
-
-
+# Choose how to act depending on whether we have a single input file or mulitple input files
 
 if(file_test("-f", input.file)==TRUE){
     # if it's an existing file (not a folder) just run one analysis
@@ -543,19 +577,16 @@ if(file_test("-f", input.file)==TRUE){
     print("**** Analysing each input file from this list ****")
     print(summaries)
     results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
-
-
     
     # rbind that list
+    print('**** Analysing data from all flowcells combined ****')
     dm = as.data.frame(rbindlist(results))
 
     # now do the single plot on ALL the output
     combined.output = file.path(output.dir, "combinedQC")
     dir.create(combined.output)
-    print('**** Making combined plots ****')
     combined.flowcell(dm, combined.output, q)
     multi.plots(dm, combined.output)
-    
     
 }else{
     #WTF
