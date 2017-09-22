@@ -1,4 +1,6 @@
 #!/usr/bin/Rscript
+# supress warnings
+options(warn=-1)
 
 library(ggplot2)
 suppressPackageStartupMessages(library(viridis))
@@ -27,7 +29,7 @@ parser <- add_option(parser,
                      type = "character",
                      dest = 'output.dir',
                      help="Output directory. If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
-)
+                     )
 
 parser <- add_option(parser, 
                      opt_str = c("-q", "--qscore_cutoff"), 
@@ -43,8 +45,7 @@ parser <- add_option(parser,
                      default=1,
                      dest = 'cores',
                      help="Number of processors to use for the anlaysis. Only helps when you are analysing more than one sequencing_summary.txt file at a time"
-)
-
+                     )
 
 opt = parse_args(parser)
 
@@ -127,6 +128,11 @@ load_summary <- function(filepath, min.q){
     
     # make sure this is a factor
     d$Q_cutoff = as.factor(d$Q_cutoff)
+    
+    keep = c("hour", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "reads_per_hour", "Q_cutoff", "flowcell")
+
+    d = d[keep]
+        
     return(d)
 }
 
@@ -255,8 +261,6 @@ channel.summary <- function(d){
     return(b)    
 }
 
-# supress warnings
-options(warn=-1)
 
 single.flowcell <- function(input.file, output.dir, q=8){
     # wrapper function to analyse data from a single flowcell
