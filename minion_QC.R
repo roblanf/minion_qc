@@ -1,23 +1,61 @@
 #!/usr/bin/Rscript
 
-args<-commandArgs(TRUE)
-
-input.file = args[1]
-output.dir = args[2]
-q = as.numeric(as.character(args[3]))
-cores = as.numeric(as.character(args[4]))
-
-q_title = paste("Q>=", q, sep="")
-
-# look at albacore's sequencing summary file
 library(ggplot2)
-library(viridis)
+suppressPackageStartupMessages(library(viridis))
 library(plyr)
 library(reshape2)
 library(yaml)
 library(scales)
 library(parallel)
-library(data.table)
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(optparse))
+
+
+# option parsing #
+
+parser <- OptionParser()
+
+parser <- add_option(parser, 
+                     opt_str = c("-i", "--input"), 
+                     type = "character",
+                     dest = 'input.file',
+                     help="Input file. Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively."
+                     )
+
+parser <- add_option(parser, 
+                     opt_str = c("-o", "--outputdirectory"), 
+                     type = "character",
+                     dest = 'output.dir',
+                     help="Output directory. If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
+)
+
+parser <- add_option(parser, 
+                     opt_str = c("-q", "--qscore_cutoff"), 
+                     type="double", 
+                     default=7.0,
+                     dest = 'q',
+                     help="The cutoff value for the mean Q score of a read. Used to create separate plots for reads above and below this threshold"
+                     )
+
+parser <- add_option(parser, 
+                     opt_str = c("-p", "--processors"), 
+                     type="integer", 
+                     default=1,
+                     dest = 'cores',
+                     help="Number of processors to use for the anlaysis. Only helps when you are analysing more than one sequencing_summary.txt file at a time"
+)
+
+
+opt = parse_args(parser)
+
+input.file = opt$input.file
+output.dir = opt$output.dir
+q = opt$q
+cores = opt$cores
+
+# this is how we label the reads at least as good as q
+q_title = paste("Q>=", q, sep="")
+
 
 # build the map for R9.5
 p1 = data.frame(channel=33:64, row=rep(1:4, each=8), col=rep(1:8, 4))
@@ -590,5 +628,5 @@ if(file_test("-f", input.file)==TRUE){
     
 }else{
     #WTF
-    warning("Could find a sequencing summary file in your input. The input must be either a sequencing_summary.txt file, or a directory containing one or more such files")
+    warning(paste("Could find a sequencing summary file in your input which was: ", input.file, "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
 }
