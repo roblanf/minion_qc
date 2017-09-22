@@ -129,7 +129,7 @@ load_summary <- function(filepath, min.q){
     # make sure this is a factor
     d$Q_cutoff = as.factor(d$Q_cutoff)
     
-    keep = c("hour", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "reads_per_hour", "Q_cutoff", "flowcell")
+    keep = c("hour","start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
 
     d = d[keep]
         
@@ -164,7 +164,6 @@ log10_minor_break = function (...){
         return(10^(minor_breaks))
     }
 }
-
 
 binSearch <- function(min, max, df, t = 100000) {
     # binary search algorithm, thanks to https://stackoverflow.com/questions/46292438/optimising-a-calculation-on-every-cumulative-subset-of-a-vector-in-r/46303384#46303384
