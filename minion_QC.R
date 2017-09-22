@@ -571,8 +571,8 @@ multi.plots = function(dm, output.dir){
 
     flog.info("Plotting sequence length over time")
     e = subset(dm, Q_cutoff=="All reads")
-    e$Q = paste(">=", q, sep="")
-    e$Q[which(e$mean_qscore_template<q)] = paste("<", q, sep="")
+    e$Q = paste("Q>=", q, sep="")
+    e$Q[which(e$mean_qscore_template<q)] = paste("Q<", q, sep="")
     p7 = ggplot(e, aes(x=start_time/3600, y=sequence_length_template, colour = flowcell)) + 
         geom_smooth() + 
         xlab("Hours into run") + 
