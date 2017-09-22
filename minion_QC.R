@@ -627,9 +627,11 @@ if(file_test("-f", input.file)==TRUE){
 
     # now do the single plot on ALL the output
     combined.output = file.path(output.dir, "combinedQC")
+    flog.info(paste("Plots from the combined output will be saved in", combined.output))
     dir.create(combined.output)
     combined.flowcell(dm, combined.output, q)
     multi.plots(dm, combined.output)
+    flog.info('**** Analysis complete ****')
     
 }else{
     #WTF
