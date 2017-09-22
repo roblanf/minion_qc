@@ -9,6 +9,7 @@ library(reshape2)
 library(yaml)
 library(scales)
 library(parallel)
+library(futile.logger)
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(optparse))
 
@@ -267,15 +268,16 @@ single.flowcell <- function(input.file, output.dir, q=8){
     # output.dir is the output directory into which to write results
     # q is the cutoff used for Q values, set by the user
 
-    print("Creating output directory")
+    flog.info(paste("Loading input file:", input.file))
+    d = load_summary(input.file, min.q=c(-Inf, q))
+
+    flowcell = unique(d$flowcell)
+
+    flog.info(paste(sep = "", flowcell, ": creating output directory:", output.dir))
     dir.create(output.dir)
-    print(paste("Saving output to", output.dir))
     out.txt = file.path(output.dir, "summary.yaml")
     
-    # write summaries
-    print(paste("Loading and summarising input file, saving to:", out.txt))
-
-    d = load_summary(input.file, min.q=c(-Inf, q))
+    flog.info(paste(sep = "", flowcell, ": summarising input file for flowcell"))
     all.reads.summary = summary.stats(d, Q_cutoff = "All reads")
     q10.reads.summary = summary.stats(d, Q_cutoff = q_title)
     
@@ -289,7 +291,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     write(as.yaml(summary), out.txt)
     
     # make plots
-    print("Plotting length histogram")
+    flog.info(paste(sep = "", flowcell, ": plotting length histogram"))
     p1 = ggplot(d, aes(x = sequence_length_template)) + 
         geom_histogram(bins = 300) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -299,7 +301,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
 
-    print("Plotting mean Q score histogram")
+    flog.info(paste(sep = "", flowcell, ": plotting mean Q score histogram"))
     p2 = ggplot(d, aes(x = mean_qscore_template)) + 
         geom_histogram(bins = 300) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
@@ -308,7 +310,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
 
-    print("Plotting events per base histogram")
+    flog.info(paste(sep = "", flowcell, ": plotting events per base histogram"))
     p3 = ggplot(d, aes(x = events_per_base)) + 
         geom_histogram(bins = 300) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -318,7 +320,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
     
-    print("Plotting flowcell overview")
+    flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
     p5 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
         geom_point(size=1.5, alpha=0.35) + 
         scale_colour_viridis() + 
@@ -331,7 +333,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=12))
     ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2500/75, height = 2400/75, plot = p5)
 
-    print("Plotting flowcell yield summary")
+    flog.info(paste(sep = "", flowcell, ": plotting flowcell yield summary"))
     p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
@@ -341,7 +343,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         theme(text = element_text(size = 15))
     ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
     
-    print("Plotting sequence length over time")
+    flog.info(paste(sep = "", flowcell, ": plotting sequence length over time"))
     e = subset(d, Q_cutoff=="All reads")
     e$Q = paste(">=", q, sep="")
     e$Q[which(e$mean_qscore_template<q)] = paste("<", q, sep="")
@@ -352,7 +354,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylim(0, NA)
     ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
     
-    print("Plotting Q score over time")
+    flog.info(paste(sep = "", flowcell, ": plotting Q score over time"))
     p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = Q, group = Q)) + 
         geom_smooth() + 
         xlab("Hours into run") + 
@@ -360,7 +362,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylim(0, NA)
     ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
     
-    print("Plotting number of reads over time")
+    flog.info(paste(sep = "", flowcell, ": plotting reads per hour"))
     f = d[c("hour", "reads_per_hour", "Q_cutoff")]
     f = f[!duplicated(f),]
     g = subset(f, Q_cutoff=="All reads")
@@ -390,7 +392,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         scale_color_discrete(guide = guide_legend(title = "Reads"))
     ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = 960/75, height = 480/75, plot = p9)
     
-    print("Plotting read length vs. q score scatterplot")
+    flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
     p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=0.05, size = 0.4) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -401,7 +403,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         ylab("Mean Q score of read")
     ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p10)
     
-    print("Plotting flowcell channels summary histograms")
+    flog.info(paste(sep = "", flowcell, ": plotting flowcell channels summary histograms"))
     c = channel.summary(subset(d, Q_cutoff=="All reads"))
     c10 = channel.summary(subset(d, Q_cutoff==q_title))
     c$Q_cutoff = "All reads"
@@ -424,11 +426,11 @@ combined.flowcell <- function(d, output.dir, q=8){
     # function to analyse combined data from multiple flowcells
     # useful for getting an overall impression of the combined data
     
-    print("Creating output directory")
+    flog.info("Creating output directory")
     out.txt = file.path(output.dir, "summary.yaml")
     
     # write summaries
-    print(paste("Summarising combined data from all flowcells, saving to:", out.txt))
+    flog.info(paste("Summarising combined data from all flowcells, saving to:", out.txt))
 
     # tidy up and remove added stuff
     drops = c("cumulative.bases", "hour", "reads.per.hour")
@@ -463,7 +465,7 @@ combined.flowcell <- function(d, output.dir, q=8){
     d2 = 0
         
     # make plots
-    print("Plotting combined length histogram")
+    flog.info("Plotting combined length histogram")
     p1 = ggplot(d, aes(x = sequence_length_template)) + 
         geom_histogram(bins = 300) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -473,7 +475,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
     
-    print("Plotting combined mean Q score histogram")
+    flog.info("Plotting combined mean Q score histogram")
     p2 = ggplot(d, aes(x = mean_qscore_template)) + 
         geom_histogram(bins = 300) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
@@ -482,7 +484,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
     
-    print("Plotting combined events per base histogram")
+    flog.info("Plotting combined events per base histogram")
     p3 = ggplot(d, aes(x = events_per_base)) + 
         geom_histogram(bins = 300) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -492,7 +494,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
     
-    print("Plotting combined flowcell yield summary")
+    flog.info("Plotting combined flowcell yield summary")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
@@ -509,7 +511,7 @@ multi.flowcell = function(input.file, output.base, q){
     # wrapper function to allow parallelisation of single-flowcell 
     # analyses when >1 flowcell is analysed in one run
     
-    print(paste("Creating folder", output.base))
+    flog.info(paste("Creating folder", output.base))
     dir.create(output.base)
     flowcell = basename(dirname(input.file))
     dir.create(file.path(output.base, flowcell))
@@ -526,7 +528,7 @@ multi.plots = function(dm, output.dir){
     # but instead just uses multiple lines on each plot.
     
     # make plots
-    print("Plotting length distributions")
+    flog.info("Plotting length distributions")
     p1 = ggplot(dm, aes(x = sequence_length_template)) + 
         geom_line(stat="density", aes(colour = flowcell, y = ..count..)) +
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -536,7 +538,7 @@ multi.plots = function(dm, output.dir){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "length_distributions.png"), width = 960/75, height = 960/75, plot = p1)
     
-    print("Plotting mean Q score distributions")
+    flog.info("Plotting mean Q score distributions")
     p2 = ggplot(dm, aes(x = mean_qscore_template)) + 
         geom_line(stat="density", aes(colour = flowcell, y = ..count..)) +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
@@ -545,7 +547,7 @@ multi.plots = function(dm, output.dir){
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "q_distributions.png"), width = 960/75, height = 960/75, plot = p2)
     
-    print("Plotting events per base distributions")
+    flog.info("Plotting events per base distributions")
     p3 = ggplot(dm, aes(x = events_per_base)) + 
         geom_line(stat="density", aes(colour = flowcell, y = ..count..)) +
         scale_x_log10(minor_breaks=log10_minor_break()) + 
@@ -556,7 +558,7 @@ multi.plots = function(dm, output.dir){
     ggsave(filename = file.path(output.dir, "epb_distributions.png"), width = 960/75, height = 960/75, plot = p3)
     
 
-    print("Plotting flowcell yield summary")
+    flog.info("Plotting flowcell yield summary")
     p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
         geom_line(size = 1) + 
         scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
@@ -567,7 +569,7 @@ multi.plots = function(dm, output.dir){
     ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
     
 
-    print("Plotting sequence length over time")
+    flog.info("Plotting sequence length over time")
     e = subset(dm, Q_cutoff=="All reads")
     e$Q = paste(">=", q, sep="")
     e$Q[which(e$mean_qscore_template<q)] = paste("<", q, sep="")
@@ -580,7 +582,7 @@ multi.plots = function(dm, output.dir){
     ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
     
 
-    print("Plotting Q score over time")
+    flog.info("Plotting Q score over time")
     p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = flowcell)) + 
         geom_smooth() + 
         xlab("Hours into run") + 
@@ -589,7 +591,7 @@ multi.plots = function(dm, output.dir){
     ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
     
 
-    print("Plotting length vs. q score")
+    flog.info("Plotting length vs. q score")
     p9 = ggplot(e, aes(x=sequence_length_template, y=mean_qscore_template, colour = flowcell)) + 
         geom_smooth() + 
         xlab("Read length") + 
@@ -614,13 +616,13 @@ if(file_test("-f", input.file)==TRUE){
     summaries = list.files(path = input.file, pattern = "sequencing_summary.txt", recursive = TRUE, full.names = TRUE)
       
     # analyse each one and keep the returns in a list
-    print("")
-    print("**** Analysing each input file from this list ****")
-    print(summaries)
+    flog.info("")
+    flog.info("**** Analysing each input file from this list ****")
+    flog.info(summaries)
     results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
     
     # rbind that list
-    print('**** Analysing data from all flowcells combined ****')
+    flog.info('**** Analysing data from all flowcells combined ****')
     dm = as.data.frame(rbindlist(results))
 
     # now do the single plot on ALL the output
@@ -631,5 +633,5 @@ if(file_test("-f", input.file)==TRUE){
     
 }else{
     #WTF
-    warning(paste("Could find a sequencing summary file in your input which was: ", input.file, "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
+    flog.warn(paste("Could find a sequencing summary file in your input which was: ", input.file, "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
 }
