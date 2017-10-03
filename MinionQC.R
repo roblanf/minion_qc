@@ -214,6 +214,7 @@ summary.stats <- function(d, Q_cutoff="All reads"){
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length, just in case
     
     total.bases = sum(as.numeric(d$sequence_length_template))
+    total.reads = nrow(d)
     N50.length = d$sequence_length_template[min(which(d$cumulative.bases > (total.bases/2)))]
     mean.length = round(mean(as.numeric(d$sequence_length_template)), digits = 1)
     median.length = round(median(as.numeric(d$sequence_length_template)), digits = 1)
@@ -238,20 +239,21 @@ summary.stats <- function(d, Q_cutoff="All reads"){
                 reads.gt(d, 500000),
                 reads.gt(d, 1000000),
                 ultra.reads)
-    names(reads) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
+    names(reads) = c(">10kb", ">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
 
     bases = list(
                 bases.gt(d, 10000)/1000000000, 
-                bases.gt(d, 10000)/1000000000, 
+                bases.gt(d, 20000)/1000000000, 
                 bases.gt(d, 50000)/1000000000,
                 bases.gt(d, 100000)/1000000000,
                 bases.gt(d, 200000)/1000000000,
                 bases.gt(d, 500000)/1000000000,
                 bases.gt(d, 1000000)/1000000000,
                 ultra.gigabases)
-    names(bases) = c(">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
+    names(bases) = c(">10kb", ">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
     
-    return(list('total.gigabases' = total.bases/1000000000, 
+    return(list('total.gigabases' = total.bases/1000000000,
+                'total.reads' = total.reads,
                 'N50.length' = N50.length, 
                 'mean.length' = mean.length, 
                 'median.length' = median.length,
