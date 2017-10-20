@@ -529,7 +529,6 @@ multi.flowcell = function(input.file, output.base, q){
     # wrapper function to allow parallelisation of single-flowcell 
     # analyses when >1 flowcell is analysed in one run
     
-    flog.info(paste("Creating folder", output.base))
     dir.create(output.base)
     flowcell = basename(dirname(input.file))
     dir.create(file.path(output.base, flowcell))
