@@ -38,14 +38,14 @@ parser <- add_option(parser,
                      opt_str = c("-i", "--input"), 
                      type = "character",
                      dest = 'input.file',
-                     help="Input file. Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively."
+                     help="Input file or directory (required). Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively."
                      )
 
 parser <- add_option(parser, 
                      opt_str = c("-o", "--outputdirectory"), 
                      type = "character",
                      dest = 'output.dir',
-                     help="Output directory. If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
+                     help="Output directory (required). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
                      )
 
 parser <- add_option(parser, 
@@ -53,7 +53,7 @@ parser <- add_option(parser,
                      type="double", 
                      default=7.0,
                      dest = 'q',
-                     help="The cutoff value for the mean Q score of a read. Used to create separate plots for reads above and below this threshold"
+                     help="The cutoff value for the mean Q score of a read (default 7). Used to create separate plots for reads above and below this threshold"
                      )
 
 parser <- add_option(parser, 
@@ -61,7 +61,7 @@ parser <- add_option(parser,
                      type="integer", 
                      default=1,
                      dest = 'cores',
-                     help="Number of processors to use for the anlaysis. Only helps when you are analysing more than one sequencing_summary.txt file at a time"
+                     help="Number of processors to use for the anlaysis (default 1). Only helps when you are analysing more than one sequencing_summary.txt file at a time"
                      )
 
 opt = parse_args(parser)
@@ -632,26 +632,36 @@ if(file_test("-f", input.file)==TRUE){
   
     # get a list of all sequencing_summary.txt files, recursively
     summaries = list.files(path = input.file, pattern = "sequencing_summary.txt", recursive = TRUE, full.names = TRUE)
-      
-    # analyse each one and keep the returns in a list
-    flog.info("")
-    flog.info("**** Analysing each input file from this list ****")
-    flog.info(summaries)
-    results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
-    
-    # rbind that list
-    flog.info('**** Analysing data from all flowcells combined ****')
-    dm = as.data.frame(rbindlist(results))
 
-    # now do the single plot on ALL the output
-    combined.output = file.path(output.dir, "combinedQC")
-    flog.info(paste("Plots from the combined output will be saved in", combined.output))
-    dir.create(combined.output)
-    combined.flowcell(dm, combined.output, q)
-    multi.plots(dm, combined.output)
-    flog.info('**** Analysis complete ****')
+    flog.info("")
+    flog.info("**** Analysing the following files ****")
+    flog.info(summaries)
+
+    
+    # if the user passes a directory with only one sequencing_summary.txt file...
+    if(length(summaries) == 1){
+        d = single.flowcell(summaries[1], output.dir, q)
+        flog.info('**** Analysis complete ****')
+    }else{
+        # analyse each one and keep the returns in a list
+        results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
+        
+        # rbind that list
+        flog.info('**** Analysing data from all flowcells combined ****')
+        dm = as.data.frame(rbindlist(results))
+
+        # now do the single plot on ALL the output
+        combined.output = file.path(output.dir, "combinedQC")
+        flog.info(paste("Plots from the combined output will be saved in", combined.output))
+        dir.create(combined.output)
+        combined.flowcell(dm, combined.output, q)
+        multi.plots(dm, combined.output)
+        flog.info('**** Analysis complete ****')
+    }
     
 }else{
     #WTF
-    flog.warn(paste("Could find a sequencing summary file in your input which was: ", input.file, "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
+    flog.warn(paste("Could find a sequencing summary file in your input which was: ", 
+        input.file, 
+        "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
 }
