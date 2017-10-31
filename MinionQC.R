@@ -327,16 +327,6 @@ single.flowcell <- function(input.file, output.dir, q=8){
         xlab("Mean Q score of read") +
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
-
-    flog.info(paste(sep = "", flowcell, ": plotting events per base histogram"))
-    p3 = ggplot(d, aes(x = events_per_base)) + 
-        geom_histogram(bins = 300) + 
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
-        theme(text = element_text(size = 15)) +
-        xlab("Mean number of events per base called in read") +
-        ylab("Number of reads")
-    ggsave(filename = file.path(output.dir, "epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
     p5 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
@@ -501,17 +491,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         xlab("Mean Q score of read") +
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
-    
-    flog.info("Plotting combined events per base histogram")
-    p3 = ggplot(d, aes(x = events_per_base)) + 
-        geom_histogram(bins = 300) + 
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
-        theme(text = element_text(size = 15)) +
-        xlab("Mean number of events per base called in read") +
-        ylab("Number of reads")
-    ggsave(filename = file.path(output.dir, "combined_epb_histogram.png"), width = 960/75, height = 960/75, plot = p3)
-    
+        
     flog.info("Plotting combined flowcell yield summary")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
@@ -563,18 +543,7 @@ multi.plots = function(dm, output.dir){
         xlab("Mean Q score of read") +
         ylab("Number of reads")
     ggsave(filename = file.path(output.dir, "q_distributions.png"), width = 960/75, height = 960/75, plot = p2)
-    
-    flog.info("Plotting events per base distributions")
-    p3 = ggplot(dm, aes(x = events_per_base)) + 
-        geom_line(stat="density", aes(colour = flowcell, y = ..count..)) +
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
-        theme(text = element_text(size = 15)) +
-        xlab("Mean number of events per base called in read") +
-        ylab("Number of reads")
-    ggsave(filename = file.path(output.dir, "epb_distributions.png"), width = 960/75, height = 960/75, plot = p3)
-    
-
+        
     flog.info("Plotting flowcell yield summary")
     p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
         geom_line(size = 1) + 
