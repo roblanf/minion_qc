@@ -422,7 +422,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=0.05, size = 0.4) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
-        scale_colour_viridis(trans = "log", labels = scientific) + 
+        scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') + 
         labs(colour='Events per base\n(log scale)\n')  + 
         theme(text = element_text(size = 15)) +
         xlab("Read length") +
