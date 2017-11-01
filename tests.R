@@ -1,6 +1,6 @@
 library(testthat)
 
-source("~/Documents/github/minion_qc/minion_qc.R")
+source("~/Documents/github/minion_qc/MinionQC.R")
 test_d = "~/Documents/github/minion_qc/testfiles/test1.txt"
 
 d = load_summary(test_d, min.q=c(-Inf, 7))
@@ -48,4 +48,20 @@ test_that('summary function works', {
     expect_equal(s$mean.q, 7.5)
     expect_equal(s$median.q, 7.5)
     expect_equal(s$reads$'>20kb', 0)
+})
+
+test_that('short run works', {
+
+    test_d = "~/Documents/github/minion_qc/testfiles/short_run/"
+    test_f = "~/Documents/github/minion_qc/testfiles/short_run/sequencing_summary.txt"
+    d = single.flowcell(test_f, test_d, 8)
+
+})
+
+test_that('1D2 run works', {
+    
+    test_d = "~/Documents/github/minion_qc/testfiles/1D2/"
+    test_f = "~/Documents/github/minion_qc/testfiles/1D2/sequencing_summary.txt"
+    d = single.flowcell(test_f, test_d, 8)
+    
 })

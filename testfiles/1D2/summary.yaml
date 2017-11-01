@@ -1,0 +1,57 @@
+input file: ~/Documents/github/minion_qc/testfiles/1D2/sequencing_summary.txt
+All reads:
+  total.gigabases: 0.9302495
+  total.reads: 159799
+  N50.length: 7937.0
+  mean.length: 5821.4
+  median.length: 5741.0
+  max.length: 54577.0
+  mean.q: 15.2
+  median.q: 15.6
+  reads:
+    '>10kb': 20447
+    '>20kb': 293
+    '>50kb': 1
+    '>100kb': 0
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 0.0e+00
+  gigabases:
+    '>10kb': 0.249736
+    '>20kb': 0.006962
+    '>50kb': 5.4577e-05
+    '>100kb': 0.0e+00
+    '>200kb': 0.0e+00
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0e+00
+Q>=7:
+  total.gigabases: 0.9301052
+  total.reads: 158952
+  N50.length: 7937.0
+  mean.length: 5851.5
+  median.length: 5768.0
+  max.length: 54577.0
+  mean.q: 15.2
+  median.q: 15.7
+  reads:
+    '>10kb': 20446
+    '>20kb': 292
+    '>50kb': 1
+    '>100kb': 0
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 0.0e+00
+  gigabases:
+    '>10kb': 0.2497112
+    '>20kb': 0.0069372
+    '>50kb': 5.4577e-05
+    '>100kb': 0.0e+00
+    '>200kb': 0.0e+00
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0e+00
+notes: ultralong reads refers to the largest set of reads with N50>100KB
+

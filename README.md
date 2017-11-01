@@ -182,7 +182,7 @@ Mean Q score for a read (x axis) vs counts (y axis). We frequently observe a col
 ![q_histogram](example_output/RB7_A2/minionQC/q_histogram.png)
 
 #### length_vs_q.png
-Read length on a log10 scale (x axis) vs mean Q score (y axis). Points are coloured by the events per base. 'Good' reads are ~1.5 events per base, and 'bad' reads are >>1.5 events per base. We often see a group of very short, 'bad', low-quality reads. We think this is something to do with our DNA extractions, becuase not everybody gets the same thing. In this plot, the point size, transperency, and plot size are always the same no matter the input data. This facilitates comparison of these plots among flowcells - those with more reads will look darker because there will be more points.
+Read length on a log10 scale (x axis) vs mean Q score (y axis). Points are coloured by the events per base. 'Good' reads are ~1.5 events per base, and 'bad' reads are >>1.5 events per base. We often see a group of very short, 'bad', low-quality reads. We think this is something to do with our DNA extractions, becuase not everybody gets the same thing. In this plot, the point size, transperency, and plot size are always the same no matter the input data. This facilitates comparison of these plots among flowcells - those with more reads will look darker because there will be more points. If you have a 1D2 run, there will be no colours on this plot, because Albacore doesn't report the number of events per read when it combines the two reads of a 1D2 run into a 2D read.
 ![length_vs_q](example_output/RB7_A2/minionQC/length_vs_q.png)
 
 #### length_by_hour.png

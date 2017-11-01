@@ -130,10 +130,21 @@ load_summary <- function(filepath, min.q){
     # by default the lowest value is -Inf, i.e. includes all reads. The 
     # other value in min.q is set by the user at the command line
     d = read.delim(filepath)
-    d$sequence_length_template = as.numeric(as.character(d$sequence_length_template))
-    d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_template))
-    d$num_events_template = as.numeric(as.character(d$num_events_template))
-    d$start_time = as.numeric(as.character(d$start_time))
+    
+    if("sequence_length_2d" %in% names(d)){
+        # it's a 1D2 or 2D run
+        d$sequence_length_template = as.numeric(as.character(d$sequence_length_2d))
+        d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_2d))
+        d$num_events_template = NA
+        d$start_time = as.numeric(as.character(d$start_time))
+        
+    }else{
+        d$sequence_length_template = as.numeric(as.character(d$sequence_length_template))
+        d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_template))
+        d$num_events_template = as.numeric(as.character(d$num_events_template))
+        d$start_time = as.numeric(as.character(d$start_time))
+    }
+    
     
     
     d$events_per_base = d$num_events_template/d$sequence_length_template
@@ -422,11 +433,16 @@ single.flowcell <- function(input.file, output.dir, q=8){
     p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=0.05, size = 0.4) + 
         scale_x_log10(minor_breaks=log10_minor_break()) + 
-        scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') + 
         labs(colour='Events per base\n(log scale)\n')  + 
         theme(text = element_text(size = 15)) +
         xlab("Read length") +
         ylab("Mean Q score of read")
+
+    if(!is.na(min(d$events_per_base))){
+        # a catch for 1D2 runs which don't have events per base
+        p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
+    }
+
     ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p10)
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell channels summary histograms"))
