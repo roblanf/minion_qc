@@ -10,6 +10,8 @@ Other tools focus on getting data out of the fastq or fast5 files, which is slow
 
 ## Quick start
 
+The input for the script is one or more `sequencing_summary.txt` files produced by Albacore1.x or 2.x. 
+
 To run it on one `sequencing_summary.txt` file:
 
 ```
@@ -23,10 +25,10 @@ Rscript MinionQC.R -i parent_directory -o output_directory
 ```
 
 
-* **MinionQC.R**: path to this script
-* **sequencing_summary.txt**: path to a `sequencing_summary.txt` file from Albacore
-* **output_directory**: path to an output directory. Files will be overwritten.
-* **parent_directory**: path to an input directory that contains one or more `sequencing_summary.txt` files in subfolders
+**MinionQC.R**: path to this script
+**sequencing_summary.txt**: path to a `sequencing_summary.txt` file from Albacore
+**output_directory**: path to an output directory. Files will be overwritten.
+**parent_directory**: path to an input directory that contains one or more `sequencing_summary.txt` files in subfolders
 
 
 ## Options
