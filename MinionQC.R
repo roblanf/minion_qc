@@ -104,6 +104,12 @@ add_cols <- function(d, min.q){
         # reads.per.hour
     
     d = subset(d, mean_qscore_template >= min.q)
+    
+    if(nrow(d)==0){ 
+        flog.error(paste("There are no reads with a mean Q score higher than your cutoff of ", min.q, ". Please choose a lower cutoff and try again.", sep = ""))
+        quit()
+    }
+    
     d = merge(d, map, by="channel")
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length
     d$cumulative.bases = cumsum(as.numeric(d$sequence_length_template))
