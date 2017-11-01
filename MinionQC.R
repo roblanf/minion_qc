@@ -130,7 +130,12 @@ load_summary <- function(filepath, min.q){
     # by default the lowest value is -Inf, i.e. includes all reads. The 
     # other value in min.q is set by the user at the command line
     d = read.delim(filepath)
-    d$sequence_length_template = as.numeric(d$sequence_length_template)
+    d$sequence_length_template = as.numeric(as.character(d$sequence_length_template))
+    d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_template))
+    d$num_events_template = as.numeric(as.character(d$num_events_template))
+    d$start_time = as.numeric(as.character(d$start_time))
+    
+    
     d$events_per_base = d$num_events_template/d$sequence_length_template
     
     flowcell = basename(dirname(filepath))
