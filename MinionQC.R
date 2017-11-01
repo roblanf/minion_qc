@@ -319,7 +319,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     
     write(as.yaml(summary), out.txt)
     
-    muxes = seq(from = 8, to = max(d$hour), by = 8)
+    muxes = seq(from = 0, to = max(d$hour), by = 8)
     
     # make plots
     flog.info(paste(sep = "", flowcell, ": plotting length histogram"))
@@ -545,7 +545,7 @@ multi.plots = function(dm, output.dir){
     # where the data is not combined (as in combined.flowcell() )
     # but instead just uses multiple lines on each plot.
     
-    muxes = seq(from = 8, to = max(dm$hour), by = 8)
+    muxes = seq(from = 0, to = max(dm$hour), by = 8)
     
     # make plots
     flog.info("Plotting length distributions")
