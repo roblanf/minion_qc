@@ -527,21 +527,21 @@ multi.plots = function(dm, output.dir){
     # make plots
     flog.info("Plotting length distributions")
     p1 = ggplot(dm, aes(x = sequence_length_template)) + 
-        geom_line(stat="density", aes(colour = flowcell, y = ..count..)) +
+        geom_line(stat="density", aes(colour = flowcell)) +
         scale_x_log10(minor_breaks=log10_minor_break()) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
         xlab("Read length") +
-        ylab("Number of reads")
+        ylab("Density")
     ggsave(filename = file.path(output.dir, "length_distributions.png"), width = 960/75, height = 960/75, plot = p1)
     
     flog.info("Plotting mean Q score distributions")
     p2 = ggplot(dm, aes(x = mean_qscore_template)) + 
-        geom_line(stat="density", aes(colour = flowcell, y = ..count..)) +
+        geom_line(stat="density", aes(colour = flowcell)) +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
         xlab("Mean Q score of read") +
-        ylab("Number of reads")
+        ylab("Density")
     ggsave(filename = file.path(output.dir, "q_distributions.png"), width = 960/75, height = 960/75, plot = p2)
         
     flog.info("Plotting flowcell yield summary")
@@ -576,16 +576,6 @@ multi.plots = function(dm, output.dir){
         facet_wrap(~Q, ncol = 1, scales = "free_y")
     ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
     
-
-    flog.info("Plotting length vs. q score")
-    p9 = ggplot(e, aes(x=sequence_length_template, y=mean_qscore_template, colour = flowcell)) + 
-        geom_smooth() + 
-        xlab("Read length") + 
-        ylab("Mean Q Score") + 
-        ylim(0, NA) +
-        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
-        facet_wrap(~Q, ncol = 1, scales = "free_y")
-    ggsave(filename = file.path(output.dir, "length_vs_Q.png"), width = 960/75, height = 480/75, plot = p9)
     
 }
 
