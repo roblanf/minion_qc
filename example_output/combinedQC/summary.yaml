@@ -1,0 +1,57 @@
+input file: example_input
+All reads:
+  total.gigabases: 7.2033013
+  total.reads: 608208
+  N50.length: 33161.0
+  mean.length: 11843.5
+  median.length: 2555.0
+  max.length: 494586.0
+  mean.q: 7.5
+  median.q: 7.7
+  reads:
+    '>10kb': 222677
+    '>20kb': 152718
+    '>50kb': 25295
+    '>100kb': 326
+    '>200kb': 2
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 710.0
+  gigabases:
+    '>10kb': 6.6666729
+    '>20kb': 5.6197975
+    '>50kb': 1.5879293
+    '>100kb': 0.0365913
+    '>200kb': 0.000703
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0731478
+Q>=7:
+  total.gigabases: 6.9987697
+  total.reads: 316346
+  N50.length: 33638.0
+  mean.length: 22123.8
+  median.length: 18795.5
+  max.length: 208407.0
+  mean.q: 10.7
+  median.q: 11.0
+  reads:
+    '>10kb': 215913
+    '>20kb': 149907
+    '>50kb': 25163
+    '>100kb': 323
+    '>200kb': 1
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 698.0
+  gigabases:
+    '>10kb': 6.5248189
+    '>20kb': 5.5344695
+    '>50kb': 1.5795601
+    '>100kb': 0.0358173
+    '>200kb': 0.0002084
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0715487
+notes: ultralong reads refers to the largest set of reads with N50>100KB
+
