@@ -106,7 +106,7 @@ Two kinds of output are produced. Output for each flowcell, and then additional 
 
 ### Output for each flowcell
 
-The script will produce 10 files for each flowcell. Here I explain each of these files, from the `example_output/RB7_A2/minionQC/` folder.
+The script will produce 10 files for each flowcell. Here I explain each of these, with examples from the `example_output/RB7_A2/minionQC/` folder. 
 
 #### summary.yaml
 
@@ -174,31 +174,31 @@ notes: ultralong reads refers to the largest set of reads with N50>100KB
 ```
 
 #### length_histogram.png
-Read length on a log10 scale (x axis) vs counts (y axis).
+Read length on a log10 scale (x axis) vs counts (y axis). This is a standard plot for long-read sequencing. Although it's obviously useful, it still doesn't tell you how much data (i.e. your total yield) you have for reads above a given length though. For that, see the `yield_summary` plots.
 ![length_histogram](example_output/RB7_A2/minionQC/length_histogram.png)
 
 #### q_histogram.png
-Mean Q score for a read (x axis) vs counts (y axis). 
+Mean Q score for a read (x axis) vs counts (y axis). We frequently observe a collection of 'good' reads with Q scores greater than about 7, and a collection of 'bad' reads, which Q scores that cluster around 4. Typically, one might filter the 'bad' reads out before assembly, but there's good evidence in the literature that they contain useful information if you treat them right.
 ![q_histogram](example_output/RB7_A2/minionQC/q_histogram.png)
 
 #### length_vs_q.png
-Read length on a log10 scale (x axis) vs mean Q score (y axis). Points are coloured by the events per base. 'Good' reads are ~1.5 events per base, and 'bad' reads are >>1.5 events per base. We often see a group of very short 'bad' reads.
+Read length on a log10 scale (x axis) vs mean Q score (y axis). Points are coloured by the events per base. 'Good' reads are ~1.5 events per base, and 'bad' reads are >>1.5 events per base. We often see a group of very short, 'bad', low-quality reads. We think this is something to do with our DNA extractions, becuase not everybody gets the same thing. In this plot, the point size, transperency, and plot size are always the same no matter the input data. This facilitates comparison of these plots among flowcells - those with more reads will look darker because there will be more points.
 ![length_vs_q](example_output/RB7_A2/minionQC/length_vs_q.png)
 
 #### length_by_hour.png
-The mean read length (y axis) over time (x axis).
+The mean read length (y axis) over time (x axis). This let's you see if you are running out of longer reads as the run progresses. Muxes, which occur every 8 hours, are shown as red dashed lines.
 ![length_by_hour](example_output/RB7_A2/minionQC/length_by_hour.png)
 
 #### q_by_hour.png
-The mean Q score (y axis) over time (x axis).
+The mean Q score (y axis) over time (x axis). We often see that our Q scores drop noticably over time - presumably this is a result of the pores wearing out, or the DNA accumulating damage, or both. Muxes, which occur every 8 hours, are shown as red dashed lines
 ![q_by_hour](example_output/RB7_A2/minionQC/q_by_hour.png)
 
 #### reads_per_hour.png
-The number of reads (y axis) obtained in each hour (x axis).
+The number of reads (y axis) obtained in each hour (x axis). Muxes (every 8 hours) are plotted in red dotted lines. You can typically see that each mux results in a noticable increase in the number of reads per hour. Muxes, which occur every 8 hours, are shown as red dashed lines
 ![q_by_hour](example_output/RB7_A2/minionQC/reads_per_hour.png)
 
 #### yield_summary.png
-The total yield (y axis) for any given minimum read length (x axis). This is just like the 'reads' table in the `summary.yaml` output, but done across all read lengths up to 100KB. I cut off at 100KB because you (probably) don't have most of your data at those lenghts. Good on you if you do though.
+The total yield (y axis) for any given minimum read length (x axis). This is just like the 'reads' table in the `summary.yaml` output, but done across all read lengths up to the read length that includes 99% of the total yield. 
 ![yield_summary](example_output/RB7_A2/minionQC/yield_summary.png)
 
 #### channel_summary.png
@@ -226,7 +226,7 @@ Mean Q score for a read on the X axis, and counts on the Y axis. From the combin
 ![combined_q_histogram](example_output/combinedQC/combined_q_histogram.png)
 
 #### combined_yield_summary.png
-The total yield (y axis) for any given minimum read length (x axis), from all data combined.
+The total yield (y axis) for any given minimum read length (x axis), from all data combined. As above, the maximum read length in the plot is the one that includes 99% of the total yield.
 ![combined_yield_summary](example_output/combinedQC/combined_yield_summary.png)
 
 #### length_distributions.png
@@ -238,13 +238,13 @@ Mean Q score of a read (x axis) vs density (y axis). One line per flowcell.
 ![q_distributions](example_output/combinedQC/q_distributions.png)
 
 #### length_by_hour.png
-The readlength (y axis) over time (x axis).
+The readlength (y axis) over time (x axis). Muxes, which occur every 8 hours, are shown as red dashed lines
 ![length_by_hour](example_output/combinedQC/length_by_hour.png)
 
 #### q_by_hour.png
-The mean Q score accross reads (y axis) over time (x axis).
+The mean Q score accross reads (y axis) over time (x axis). Muxes, which occur every 8 hours, are shown as red dashed lines
 ![q_by_hour](example_output/combinedQC/q_by_hour.png)
 
 #### yield_summary.png
-The total yield (y axis) for any given minimum read length (x axis). One line per flowcell.
+The total yield (y axis) for any given minimum read length (x axis). One line per flowcell. The maximum read length in the plot is the one that includes 99% of the total yield for the flowcell with the highest total yield.
 ![yield_summary](example_output/combinedQC/yield_summary.png)
