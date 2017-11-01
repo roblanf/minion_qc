@@ -357,11 +357,13 @@ single.flowcell <- function(input.file, output.dir, q=8){
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield summary"))
     p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
-        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
         xlab("Minimum read length") +
         ylab("Total yield in bases") +
         scale_colour_discrete(guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
+    xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
+    p6 = p6 + scale_x_continuous(limits = c(0, xmax))
+
     ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
     
     flog.info(paste(sep = "", flowcell, ": plotting sequence length over time"))
@@ -488,6 +490,7 @@ combined.flowcell <- function(d, output.dir, q=8){
     d1 = 0
     d2 = 0
         
+    
     # make plots
     flog.info("Plotting combined length histogram")
     p1 = ggplot(d, aes(x = sequence_length_template)) + 
@@ -511,11 +514,13 @@ combined.flowcell <- function(d, output.dir, q=8){
     flog.info("Plotting combined flowcell yield summary")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
-        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
         xlab("Minimum read length") +
         ylab("Total yield in bases") +
         scale_colour_discrete(guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
+    xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
+    p4 = p4 + scale_x_continuous(limits = c(0, xmax))
+    
     ggsave(filename = file.path(output.dir, "combined_yield_summary.png"), width = 960/75, height = 960/75, plot = p4)
     
 }
@@ -565,11 +570,13 @@ multi.plots = function(dm, output.dir){
     flog.info("Plotting flowcell yield summary")
     p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
         geom_line(size = 1) + 
-        scale_x_continuous(breaks =c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000), limits = c(0, 100000)) +
         xlab("Minimum read length") +
         ylab("Total yield in bases") +
         theme(text = element_text(size = 15)) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
+    xmax = max(dm$sequence_length_template[which(dm$cumulative.bases > 0.01 * max(dm$cumulative.bases))])
+    p6 = p6 + scale_x_continuous(limits = c(0, xmax))
+    
     ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
     
 
