@@ -246,5 +246,5 @@ The mean Q score accross reads (y axis) over time (x axis). Muxes, which occur e
 ![q_by_hour](example_output/combinedQC/q_by_hour.png)
 
 #### yield_summary.png
-The total yield (y axis) for any given minimum read length (x axis). One line per flowcell. The maximum read length in the plot is the one that includes 99% of the total yield for the flowcell with the highest total yield.
+The total yield (y axis) for any given minimum read length (x axis). One line per flowcell. The maximum read length in the plot is the one that includes 99% of the total yield for the flowcell with the highest total yield. The comparison of the two flowcells below is interesting. For the one in red, we used a blue-pippen for size selection, removing fragments <20KB. For the one in blue, we used a bead-based size selection which removes just the smallest fragments <~1KB. The result is that the two flowcells have very similar overall yields, but quite different yield profiles.
 ![yield_summary](example_output/combinedQC/yield_summary.png)
