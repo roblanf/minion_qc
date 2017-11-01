@@ -23,10 +23,10 @@ Rscript MinionQC.R -i parent_directory -o output_directory
 ```
 
 
-* *MinionQC.R*: path to this script
-* *sequencing_summary.txt*: path to a `sequencing_summary.txt` file from Albacore
-* *output_directory*: path to an output directory. Files will be overwritten.
-* *parent_directory*: path to an input directory that contains one or more `sequencing_summary.txt` files in subfolders
+* **MinionQC.R**: path to this script
+* **sequencing_summary.txt**: path to a `sequencing_summary.txt` file from Albacore
+* **output_directory**: path to an output directory. Files will be overwritten.
+* **parent_directory**: path to an input directory that contains one or more `sequencing_summary.txt` files in subfolders
 
 
 ## Options
@@ -34,7 +34,6 @@ Rscript MinionQC.R -i parent_directory -o output_directory
 Can be viewed by typing `Rscript MinionQC.R -h` at the commandline.
 
 ```
-
 Options:
   -h, --help
     Show this help message and exit
@@ -50,6 +49,32 @@ Options:
 
   -p PROCESSORS, --processors=PROCESSORS
     Number of processors to use for the anlaysis (default 1). Only helps when you are analysing more than one sequencing_summary.txt file at a time
+```
+
+## Installation
+
+The point of this script is that it requires no interaction and no installation of any meaningful kind. 
+
+#### I just want the script
+
+Use `curl` or `wget` to get just the script (which is all you need)
+
+```
+# this
+curl https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R > MinionQC.R
+
+# or this
+wget https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R > MinionQC.R
+```
+
+#### I want the example input and output too
+
+This comes as a file that is ~100MB. Download the `.zip` or `.tar.gz` file from here: https://github.com/roblanf/minion_qc/releases/latest/
+
+If you want to run the example input, one option is to change directories to the file containing the `MinonQC.R` script and type:
+
+```
+Rscript MinionQC.R -i example_input -o my_example_output -p 2
 ```
 
 ## Dependencies
