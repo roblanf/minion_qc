@@ -319,6 +319,8 @@ single.flowcell <- function(input.file, output.dir, q=8){
     
     write(as.yaml(summary), out.txt)
     
+    muxes = seq(from = 8, to = max(d$hour), by = 8)
+    
     # make plots
     flog.info(paste(sep = "", flowcell, ": plotting length histogram"))
     p1 = ggplot(d, aes(x = sequence_length_template)) + 
@@ -367,6 +369,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     e$Q = paste(">=", q, sep="")
     e$Q[which(e$mean_qscore_template<q)] = paste("<", q, sep="")
     p7 = ggplot(e, aes(x=start_time/3600, y=sequence_length_template, colour = Q, group = Q)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_smooth() + 
         xlab("Hours into run") + 
         ylab("Mean read length") + 
@@ -375,6 +378,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     
     flog.info(paste(sep = "", flowcell, ": plotting Q score over time"))
     p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = Q, group = Q)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_smooth() + 
         xlab("Hours into run") + 
         ylab("Mean Q score") + 
@@ -403,6 +407,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     i$Q_cutoff = as.character(i$Q_cutoff)
     i$Q_cutoff[which(i$Q_cutoff==q_title)] = paste("Q>=", q, sep="")
     p9 = ggplot(i, aes(x=hour, y=reads_per_hour, colour = Q_cutoff, group = Q_cutoff)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_point() +
         geom_line() +
         xlab("Hours into run") + 
@@ -535,6 +540,8 @@ multi.plots = function(dm, output.dir){
     # where the data is not combined (as in combined.flowcell() )
     # but instead just uses multiple lines on each plot.
     
+    muxes = seq(from = 8, to = max(dm$hour), by = 8)
+    
     # make plots
     flog.info("Plotting length distributions")
     p1 = ggplot(dm, aes(x = sequence_length_template)) + 
@@ -571,6 +578,7 @@ multi.plots = function(dm, output.dir){
     e$Q = paste("Q>=", q, sep="")
     e$Q[which(e$mean_qscore_template<q)] = paste("Q<", q, sep="")
     p7 = ggplot(e, aes(x=start_time/3600, y=sequence_length_template, colour = flowcell)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_smooth() + 
         xlab("Hours into run") + 
         ylab("Mean read length") + 
@@ -581,6 +589,7 @@ multi.plots = function(dm, output.dir){
 
     flog.info("Plotting Q score over time")
     p8 = ggplot(e, aes(x=start_time/3600, y=mean_qscore_template, colour = flowcell)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_smooth() + 
         xlab("Hours into run") + 
         ylab("Mean Q score") + 
