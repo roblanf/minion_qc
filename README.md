@@ -174,7 +174,7 @@ notes: ultralong reads refers to the largest set of reads with N50>100KB
 ```
 
 #### length_histogram.png
-Read length on a log10 scale (x axis) vs counts (y axis). This is a standard plot for long-read sequencing. Although it's obviously useful, it still doesn't tell you how much data (i.e. your total yield) you have for reads above a given length though. For that, see the `yield_summary` plots.
+Read length on a log10 scale (x axis) vs counts (y axis). This is a standard plot for long-read sequencing. Although it's obviously useful, it still doesn't tell you how much data (i.e. your total yield) you have for reads above a given length though. For that, see the `yield_summary` plots. Of note in our data are the large number of very short reads. We don't think these are actually DNA fragments. Instead, we think they are contaminant molecules blocking pores (see below for more on this). In any case, it is exactly this kind of observation that led us to continue developing these QC tools. Knowing what's holding your performance back is key to getting better. 
 ![length_histogram](example_output/RB7_A2/minionQC/length_histogram.png)
 
 #### q_histogram.png
@@ -206,7 +206,7 @@ Histograms of total bases, total reads, mean read length, and median read length
 ![channel_summary](example_output/RB7_A2/minionQC/channel_summary.png)
 
 #### flowcell_overview.png
-The 512 channels are laid out as on the R9.5 flowcell. Each panel of the plot shows time on the x axis, and read length on the y axis. Points are coloured by the Q score. This gives a little insight into exactly what was going on in each of your channels over the course of the run. You'll notice that in the example output for `RB7_D3` (the second plot below) you can see clearly that there was a bubble on the right-hand-side of the flowcell.
+The 512 channels are laid out as on the R9.5 flowcell. Each panel of the plot shows time on the x axis, and read length on the y axis. Points are coloured by the Q score. This gives a little insight into exactly what was going on in each of your channels over the course of the run. You'll notice that in the example output for `RB7_D3` (the second plot below) you can see clearly that there was a bubble on the right-hand-side of the flowcell. The other thing of note in these plots is the frequent (and sometimes extended) periods in which some pores produce only very short, very low quality 'reads'. Our current best guess is that this is due to residual contaminants in our DNA extractions blocking the pores. A blocked pore looks like a change in current. And if the blockage is persistent (e.g. a large molecule just sitting blocking the pore, occasionally letting some current through) this could produce exactly this kind of pattern. Hopefully you don't see this in your samples. We work with plants, so this is the best we've been able to do so far.
 ![flowcell_channels_epb](example_output/RB7_A2/minionQC/flowcell_overview.png)
 ![flowcell_channels_epb](example_output/RB7_D3/minionQC/flowcell_overview.png)
 
