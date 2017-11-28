@@ -307,7 +307,6 @@ single.flowcell <- function(input.file, output.dir, q=8){
     # input.file is a sequencing_summary.txt file from a 1D run
     # output.dir is the output directory into which to write results
     # q is the cutoff used for Q values, set by the user
-
     flog.info(paste("Loading input file:", input.file))
     d = load_summary(input.file, min.q=c(-Inf, q))
 
@@ -438,7 +437,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         xlab("Read length") +
         ylab("Mean Q score of read")
 
-    if(!is.na(min(d$events_per_base))){
+    if(max(d$events_per_base, na.rm=T)>0){
         # a catch for 1D2 runs which don't have events per base
         p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
     }
