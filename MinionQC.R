@@ -22,6 +22,7 @@ library(ggplot2)
 suppressPackageStartupMessages(library(viridis))
 library(plyr)
 library(reshape2)
+library(readr)
 library(yaml)
 library(scales)
 library(parallel)
@@ -129,7 +130,13 @@ load_summary <- function(filepath, min.q){
     # min.q is a vector of length 2 defining 2 levels of min.q to have
     # by default the lowest value is -Inf, i.e. includes all reads. The 
     # other value in min.q is set by the user at the command line
-    d = read.delim(filepath)
+    d = read_tsv(filepath, col_types = cols_only(channel = 'i', 
+                                                num_events_template = 'i', 
+                                                sequence_length_template = 'i', 
+                                                mean_qscore_template = 'n',
+                                                sequence_length_2d = 'i',
+                                                mean_qscore_2d = 'n',
+                                                start_time = 'n'))
     
     if("sequence_length_2d" %in% names(d)){
         # it's a 1D2 or 2D run
@@ -144,11 +151,9 @@ load_summary <- function(filepath, min.q){
         d$num_events_template = as.numeric(as.character(d$num_events_template))
         d$start_time = as.numeric(as.character(d$start_time))
     }
-    
-    
-    
+        
     d$events_per_base = d$num_events_template/d$sequence_length_template
-    
+
     flowcell = basename(dirname(filepath))
     
     # add columns for all the reads
@@ -169,7 +174,6 @@ load_summary <- function(filepath, min.q){
     d$Q_cutoff = as.factor(d$Q_cutoff)
     
     keep = c("hour","start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
-
     d = d[keep]
         
     return(d)
