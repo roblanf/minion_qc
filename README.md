@@ -1,5 +1,3 @@
-# Quality control for MinION sequencing data
-
 - [What and Why?](#)
 - [Quick start](#)
 - [Options](#)
