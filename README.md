@@ -1,3 +1,34 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Quality control for MinION sequencing data](#)
+  - [What and Why?](#)
+  - [Quick start](#)
+  - [Options](#)
+  - [Installation](#)
+      - [Dependencies](#)
+  - [Output details](#)
+    - [Output for a single flowcell](#)
+      - [summary.yaml](#)
+      - [length_histogram.png](#)
+      - [q_histogram.png](#)
+      - [length_vs_q.png](#)
+      - [length_by_hour.png](#)
+      - [q_by_hour.png](#)
+      - [reads_per_hour.png](#)
+      - [yield_summary.png](#)
+      - [channel_summary.png](#)
+      - [flowcell_overview.png](#)
+    - [Output for the combined data](#)
+      - [summary.yaml](#)
+      - [combined_length_histogram.png](#)
+      - [combined_q_histogram.png](#)
+      - [combined_yield_summary.png](#)
+      - [length_distributions.png](#)
+      - [q_distributions.png](#)
+      - [length_by_hour.png](#)
+      - [q_by_hour.png](#)
+      - [yield_summary.png](#)
+
 # Quality control for MinION sequencing data
 
 ## What and Why?
