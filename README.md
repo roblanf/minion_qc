@@ -1,3 +1,5 @@
+# Fast and effective quality control for MinION sequencing data
+
 - [What and Why?](https://github.com/roblanf/minion_qc#what-and-why)
 - [Quick start](https://github.com/roblanf/minion_qc#quick-start)
 - [Commandline options](https://github.com/roblanf/minion_qc#commandline-options)
