@@ -1,30 +1,11 @@
-- [What and Why?](#)
-- [Quick start](#)
-- [Options](#)
-- [Installation](#)
-    - [Dependencies](#)
-- [Output details](#)
-  - [Output for a single flowcell](#)
-    - [summary.yaml](#)
-    - [length_histogram.png](#)
-    - [q_histogram.png](#)
-    - [length_vs_q.png](#)
-    - [length_by_hour.png](#)
-    - [q_by_hour.png](#)
-    - [reads_per_hour.png](#)
-    - [yield_summary.png](#)
-    - [channel_summary.png](#)
-    - [flowcell_overview.png](#)
-  - [Output for the combined data](#)
-    - [summary.yaml](#)
-    - [combined_length_histogram.png](#)
-    - [combined_q_histogram.png](#)
-    - [combined_yield_summary.png](#)
-    - [length_distributions.png](#)
-    - [q_distributions.png](#)
-    - [length_by_hour.png](#)
-    - [q_by_hour.png](#)
-    - [yield_summary.png](#)
+- [What and Why?](https://github.com/roblanf/minion_qc#what-and-why)
+- [Quick start](https://github.com/roblanf/minion_qc#quick-start)
+- [Commandline options](https://github.com/roblanf/minion_qc#commandline-options)
+- [Installation](https://github.com/roblanf/minion_qc#installation)
+    - [Dependencies](https://github.com/roblanf/minion_qc#dependencies)
+- [Output details](https://github.com/roblanf/minion_qc#output-details)
+  - [Analysing a single flowcell](https://github.com/roblanf/minion_qc#analysing-a-single-flowcell)
+  - [Analysing multiple flowcells](https://github.com/roblanf/minion_qc#analysing-multiple-flowcells)
 
 
 ## What and Why?
@@ -56,7 +37,7 @@ Rscript MinionQC.R -i parent_directory -o output_directory
 
 You'll see a series of plots in the output directory, and a YAML file that describes your output.
 
-## Options
+## Commandline options
 
 Can be viewed by typing `Rscript MinionQC.R -h` at the commandline.
 
@@ -140,7 +121,7 @@ There are two colour schemes used in the plots:
 * **Q Scores**: Green is a high Q score, and blue is a low Q score. These are either represented as a categorical variable where blue is all of your reads and green is the reads above your Q score cutoff (the default is Q>=7), or as a continuous variable that runs from blue (bad Q score) to green (good Q score). 
 * **Flowcells**: on plots that show data from more than one flowcell, each flowcell is represented by a unique colour.
 
-### Output for a single flowcell
+### Analysing a single flowcell
 
 #### summary.yaml
 
@@ -244,7 +225,7 @@ The 512 channels are laid out as on the R9.5 flowcell. Each panel of the plot sh
 ![flowcell_channels_epb](example_output/RB7_A2/minionQC/flowcell_overview.png)
 ![flowcell_channels_epb](example_output/RB7_D3/minionQC/flowcell_overview.png)
 
-### Output for the combined data
+### Analysing multiple flowcells
 
 9 files are produced that summarise the combined data across all flowcells. Examples are in the `example_output/combinedQC/` folder. 
 
