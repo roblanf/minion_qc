@@ -1,16 +1,14 @@
 # Quality control for MinION sequencing data
 
-## What?
+## What and Why?
 
-An R script for quality control of data from Oxford Nanopore's MinION sequencer, using the `sequencing_summary.txt` file from Albacore as input.
+This is a self-contained R script to perform quality control on data from Oxford Nanopore's MinION sequencer. 
 
-## Why?
-
-Other tools focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this approach is that it works on a single, small, .txt summary file. So it's a lot quicker than most other things out there: it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
+There are lots of tools that do related things, but they all focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this script is that it works directly with the `sequencing_summary.txt` files that are produced by the Albacore base caller. This makes minion_qc a lot quicker than most other things out there. For example, it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
 
 ## Quick start
 
-The input for the script is one or more `sequencing_summary.txt` files produced by Albacore1.x or 2.x, based on data from a minION run. 
+The input for the script is one or more `sequencing_summary.txt` files produced by Albacore1.x or 2.x, based on data from a minION run. Note that they must be named `sequencing_summary.txt`, because for simplicity the script just searches for those files.
 
 To run it on one `sequencing_summary.txt` file:
 
@@ -23,7 +21,6 @@ To run it on a directory with multiple `sequencing_summary.txt` files:
 ```shell
 Rscript MinionQC.R -i parent_directory -o output_directory
 ```
-
 
 * **MinionQC.R**: path to this script
 * **sequencing_summary.txt**: path to a `sequencing_summary.txt` file from Albacore
@@ -116,7 +113,7 @@ There are two colour schemes used in the plots:
 * **Q Scores**: Green is a high Q score, and blue is a low Q score. These are either represented as a categorical variable where blue is all of your reads and green is the reads above your Q score cutoff (the default is Q>=7), or as a continuous variable that runs from blue (bad Q score) to green (good Q score). 
 * **Flowcells**: on plots that show data from more than one flowcell, each flowcell is represented by a unique colour.
 
-## Output for a single flowcell
+### Output for a single flowcell
 
 #### summary.yaml
 
