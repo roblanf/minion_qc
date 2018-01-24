@@ -6,11 +6,11 @@ An R script for quality control of data from Oxford Nanopore's MinION sequencer,
 
 ## Why?
 
-Other tools focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this approach is that it works on a single, small, .txt summary file. So it's a lot quicker than most other things out there: it takes about a minute to analyse a 4GB flowcell on my laptop. 
+Other tools focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this approach is that it works on a single, small, .txt summary file. So it's a lot quicker than most other things out there: it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
 
 ## Quick start
 
-The input for the script is one or more `sequencing_summary.txt` files produced by Albacore1.x or 2.x. 
+The input for the script is one or more `sequencing_summary.txt` files produced by Albacore1.x or 2.x, based on data from a minION run. 
 
 To run it on one `sequencing_summary.txt` file:
 
@@ -20,16 +20,17 @@ Rscript MinionQC.R -i sequencing_summary.txt -o output_directory
 
 To run it on a directory with multiple `sequencing_summary.txt` files:
 
-```
+```shell
 Rscript MinionQC.R -i parent_directory -o output_directory
 ```
 
 
-**MinionQC.R**: path to this script
-**sequencing_summary.txt**: path to a `sequencing_summary.txt` file from Albacore
-**output_directory**: path to an output directory. Files will be overwritten.
-**parent_directory**: path to an input directory that contains one or more `sequencing_summary.txt` files in subfolders
+* **MinionQC.R**: path to this script
+* **sequencing_summary.txt**: path to a `sequencing_summary.txt` file from Albacore
+* **parent_directory**: path to an input directory that contains one or more `sequencing_summary.txt` files in subfolders
+* **output_directory**: path to an output directory. Files will be overwritten.
 
+You'll see a series of plots in the output directory, and a YAML file that describes your output.
 
 ## Options
 
@@ -57,11 +58,15 @@ Options:
 
 The point of this script is that it requires no interaction and no installation of any meaningful kind. 
 
-#### I just want the script
+**I just want the script**
 
-Use `curl` or `wget` to get just the script (which is all you need)
+The script is all you need, as long as you'r not interested in the example files.
 
-```
+You can just download or copy/paste the raw R script from here: https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R
+
+Or you can use `curl` or `wget` to get it
+
+```shell
 # this
 curl https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R > MinionQC.R
 
@@ -69,9 +74,9 @@ curl https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R > Min
 wget https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R > MinionQC.R
 ```
 
-#### I want the example input and output too
+**I want the example input and output too**
 
-This comes as a file that is ~100MB. Download the `.zip` or `.tar.gz` file from here: https://github.com/roblanf/minion_qc/releases/latest/
+Download the `.zip` or `.tar.gz` file from here: https://github.com/roblanf/minion_qc/releases/latest/
 
 If you want to run the example input, one option is to change directories to the file containing the `MinonQC.R` script and type:
 
@@ -79,10 +84,11 @@ If you want to run the example input, one option is to change directories to the
 Rscript MinionQC.R -i example_input -o my_example_output -p 2
 ```
 
-## Dependencies
-A recent version of R, and install the following:
+#### Dependencies
 
-```
+To run the script, you will need a recent version of R, and the following packages. To install the right packages, just start up R and copy/paste the code below.
+
+```R
 install.packages("data.table")
 install.packages("futile.logger")
 install.packages("ggplot2")
@@ -100,14 +106,17 @@ install.packages("yaml")
 The following output was created by running the script on the example input files, which contains data from two flowcells from our lab.
 
 ```
-Rscript MinionQC.R -i example_input -o example_output/RB7_A2/minionQC
+Rscript MinionQC.R -i example_input -o example_output
 ```
 
-Two kinds of output are produced. Output for each flowcell, and then additional output for the combined flowcells to allow for comparison.
+Two kinds of output are produced. Output for each flowcell, and then additional output for the combined flowcells to allow for comparison. The script will produce 10 files to describe each flowcell, and 9 files to describe all flowcells combined (if you have analysed more than one flowcell). I explain each of these files below, with examples from the `example_output/RB7_A2/minionQC/` folder for a single flowcell, and examples from the `example_output/combinedQC/` folder for multiple flowcells. 
 
-### Output for each flowcell
+There are two colour schemes used in the plots:
 
-The script will produce 10 files for each flowcell. Here I explain each of these, with examples from the `example_output/RB7_A2/minionQC/` folder. 
+* **Q Scores**: Green is a high Q score, and blue is a low Q score. These are either represented as a categorical variable where blue is all of your reads and green is the reads above your Q score cutoff (the default is Q>=7), or as a continuous variable that runs from blue (bad Q score) to green (good Q score). 
+* **Flowcells**: on plots that show data from more than one flowcell, each flowcell is represented by a unique colour.
+
+## Output for a single flowcell
 
 #### summary.yaml
 
