@@ -49,10 +49,10 @@ Options:
     Show this help message and exit
 
   -i INPUT, --input=INPUT
-    Input file or directory (required). Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively.
+    Input file or directory (required). Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively for files named 'sequencing_summary.txt'.
 
   -o OUTPUTDIRECTORY, --outputdirectory=OUTPUTDIRECTORY
-    Output directory (required). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file
+    Output directory (optional: defaults to the same as the input directory). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file. A separate directory called 'combinedQC' will contain plots and data on all flowcells combined.
 
   -q QSCORE_CUTOFF, --qscore_cutoff=QSCORE_CUTOFF
     The cutoff value for the mean Q score of a read (default 7). Used to create separate plots for reads above and below this threshold
@@ -67,7 +67,7 @@ The point of this script is that it requires no interaction and no installation 
 
 **I just want the script**
 
-The script is all you need, as long as you'r not interested in the example files.
+The script is all you need, as long as you're not interested in the example files.
 
 You can just download or copy/paste the raw R script from here: https://raw.githubusercontent.com/roblanf/minion_qc/master/MinionQC.R
 
@@ -118,10 +118,10 @@ Rscript MinionQC.R -i example_input -o example_output
 
 Two kinds of output are produced. Output for each flowcell, and then additional output for the combined flowcells to allow for comparison. The script will produce 10 files to describe each flowcell, and 9 files to describe all flowcells combined (if you have analysed more than one flowcell). I explain each of these files below, with examples from the `example_output/RB7_A2/minionQC/` folder for a single flowcell, and examples from the `example_output/combinedQC/` folder for multiple flowcells. 
 
-There are two colour schemes used in the plots:
+There are two main colour schemes used in the plots:
 
 * **Q Scores**: Green is a high Q score, and blue is a low Q score. These are either represented as a categorical variable where blue is all of your reads and green is the reads above your Q score cutoff (the default is Q>=7), or as a continuous variable that runs from blue (bad Q score) to green (good Q score). 
-* **Flowcells**: on plots that show data from more than one flowcell, each flowcell is represented by a unique colour.
+* **Flowcells**: on plots that show data from more than one flowcell, each flowcell is represented by a unique colour. Typically there are two panels in these plots: all reads are shown on the top panel, and the reads that pass your quality score cutoff (`-q` at the commandline) are shown on the bottom panel.
 
 ### Analysing a single flowcell
 
@@ -211,12 +211,18 @@ The mean Q score (y axis) over time (x axis). We often see that our Q scores dro
 ![q_by_hour](example_output/RB7_A2/minionQC/q_by_hour.png)
 
 #### reads_per_hour.png
-The number of reads (y axis) obtained in each hour (x axis). Muxes (every 8 hours) are plotted in red dotted lines. You can typically see that each mux results in a noticable increase in the number of reads per hour. Muxes, which occur every 8 hours, are shown as red dashed lines
+The number of reads (y axis) obtained in each hour (x axis). Muxes (every 8 hours) are plotted as red dashed lines. You can typically see that each mux results in a noticable increase in the number of reads per hour. 
 ![q_by_hour](example_output/RB7_A2/minionQC/reads_per_hour.png)
 
-#### yield_summary.png
-The total yield (y axis) for any given minimum read length (x axis). This is just like the 'reads' table in the `summary.yaml` output, but done across all read lengths up to the read length that includes 99% of the total yield. 
-![yield_summary](example_output/RB7_A2/minionQC/yield_summary.png)
+#### yield_by_length.png
+The total yield (y axis) for any given minimum read length (x axis). This is just like the 'reads' table in the `summary.yaml` output, but done across all read lengths up to the read length that includes 99% of the total yield. For example, to read off the amount of bases you have sequenced from reads of at least 25KB, just go up from 25KB on the x-axis to the line, then left to the Y axis, and you should get an answer of ~2.5GB. This can be particularly useful when your aim is to achieve a particular total yield of reads longer than some predefined length from a series of flowcells. This is often the case for genome sequencing projects. 
+![yield_by_length](example_output/RB7_A2/minionQC/yield_by_length.png)
+
+
+#### yield_over_time.png
+The total yield (y axis) over the time that the flowcell was run. This can help to identify any issues that occurred during the run of a particular flowcell. Muxes are shown as dashed red lines. This one looks fine, and shows the expected boosts from each mux.  
+![yield_over_time](example_output/RB7_A2/minionQC/yield_over_time.png)
+
 
 #### channel_summary.png
 Histograms of total bases, total reads, mean read length, and median read length that show the variance across the 512 available channels. Repeated for all data and reads with Q>10.
@@ -242,12 +248,12 @@ Read length, on a log10 scale, from the combined data on the X axis, and read co
 Mean Q score for a read on the X axis, and counts on the Y axis. From the combined data across all flowcells.
 ![combined_q_histogram](example_output/combinedQC/combined_q_histogram.png)
 
-#### combined_yield_summary.png
+#### combined_yield_by_length.png
 The total yield (y axis) for any given minimum read length (x axis), from all data combined. As above, the maximum read length in the plot is the one that includes 99% of the total yield.
-![combined_yield_summary](example_output/combinedQC/combined_yield_summary.png)
+![combined_yield_by_length](example_output/combinedQC/combined_yield_by_length.png)
 
 #### length_distributions.png
-Read length on a log10 scale (x axis) vs density (y axis). One line per flowcell. This allows for comparison of read length distributions across flowcells, but it's hard to use these kinds of plots to compare yields. For that, use the `yield_summary.png` plot (see below).
+Read length on a log10 scale (x axis) vs density (y axis). One line per flowcell. This allows for comparison of read length distributions across flowcells, but it's hard to use these kinds of plots to compare yields, because the height of a plot depends on how much of the read distribution focussed in that area. To compare yields more directly, use the `yield_by_length` and `yield_over_time` plots.
 ![length_distributions](example_output/combinedQC/length_distributions.png)
 
 #### q_distributions.png
@@ -262,6 +268,10 @@ The readlength (y axis) over time (x axis). Muxes, which occur every 8 hours, ar
 The mean Q score accross reads (y axis) over time (x axis). Muxes, which occur every 8 hours, are shown as red dashed lines
 ![q_by_hour](example_output/combinedQC/q_by_hour.png)
 
-#### yield_summary.png
-The total yield (y axis) for any given minimum read length (x axis). One line per flowcell. The maximum read length in the plot is the one that includes 99% of the total yield for the flowcell with the highest total yield. The comparison of the two flowcells below is interesting. For the one in red, we used a blue-pippen for size selection, removing fragments <20KB. For the one in blue, we used a bead-based size selection which removes just the smallest fragments <~1KB. The result is that the two flowcells have very similar overall yields, but quite different yield profiles. 
-![yield_summary](example_output/combinedQC/yield_summary.png)
+#### yield_by_length.png
+The total yield (y axis) for any given minimum read length (x axis). Each flowcell has its own colour. All reads are in the top panel, and just the reads above your Q cutoff are in the bottom panel. This is just like the 'reads' table in the `summary.yaml` output, but done across all read lengths up to the read length that includes 99% of the total yield for the flowcell with the highest total yield. The comparison of the two flowcells below shows the effect of using a blue pippen for size selection, removing fragments <20KB. For the one in blue, we used a bead-based size selection which removes just the smallest fragments <~1KB. The result is that the two flowcells have very similar overall yields, but quite different  profiles. 
+![yield_by_length](example_output/combinedQC/yield_by_length.png)
+
+#### yield_over_time.png
+The total yield (y axis) over the time that the flowcell was run (x axis). This can help to identify any issues that occurred during the run of a particular flowcell. Muxes are shown as dashed red lines. This plot shows that something happened to flowcell RB7_D3 at ~17 hours, which stopped it from working until the next mux at 24 hours. 
+![yield_over_time](example_output/combinedQC/yield_over_time.png)
