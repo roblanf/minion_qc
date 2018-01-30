@@ -47,7 +47,7 @@ parser <- add_option(parser,
                      type = "character",
                      dest = 'output.dir',
                      default=NA,
-                     help="Output directory (required). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
+                     help="Output directory (optional, default is the same as the input directory). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
                      )
 
 parser <- add_option(parser, 
@@ -69,9 +69,13 @@ parser <- add_option(parser,
 opt = parse_args(parser)
 
 # output == intput unless otherwise specified
+if(is.na(opt$output.dir)){ 
+    opt$output.dir = opt$input.file 
+    if(file_test("-f", opt$output.dir)==TRUE){
+        opt$output.dir = dirname(opt$output.dir)
+    }
+}
 
-
-if(is.na(opt$output.dir)){ opt$output.dir = opt$input.file }
 input.file = opt$input.file
 output.dir = opt$output.dir
 q = opt$q
@@ -557,7 +561,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
         
-    flog.info("Plotting combined flowcell yield summary")
+    flog.info("Plotting combined yield by length")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length") +
@@ -567,7 +571,7 @@ combined.flowcell <- function(d, output.dir, q=8){
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
     p4 = p4 + scale_x_continuous(limits = c(0, xmax))
     
-    ggsave(filename = file.path(output.dir, "combined_yield_summary.png"), width = 960/75, height = 960/75, plot = p4)
+    ggsave(filename = file.path(output.dir, "combined_yield_by_length.png"), width = 960/75, height = 960/75, plot = p4)
     
 }
 
