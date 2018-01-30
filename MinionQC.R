@@ -100,7 +100,7 @@ map = rbind(p1, p2, p3, p4, p5, p6, p7, p8, q1, q2, q3, q4, q5, q6, q7, q8)
 add_cols <- function(d, min.q){
     # take a sequencing sumamry file (d), and a minimum Q value you are interested in (min.q)
     # return the same data frame with the following columns added 
-        # cumulative.bases
+        # cumulative.bases and cumulative.bases.time
         # hour of run
         # reads.per.hour
     
@@ -112,6 +112,10 @@ add_cols <- function(d, min.q){
     }
     
     d = merge(d, map, by="channel")
+
+    d = d[with(d, order(as.numeric(start_time))), ] # sort by start time
+    d$cumulative.bases.time = cumsum(as.numeric(d$sequence_length_template))
+
     d = d[with(d, order(-sequence_length_template)), ] # sort by read length
     d$cumulative.bases = cumsum(as.numeric(d$sequence_length_template))
     d$hour = d$start_time %/% 3600
@@ -173,7 +177,7 @@ load_summary <- function(filepath, min.q){
     # make sure this is a factor
     d$Q_cutoff = as.factor(d$Q_cutoff)
     
-    keep = c("hour","start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
+    keep = c("hour","start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "cumulative.bases.time", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
     d = d[keep]
         
     return(d)
@@ -306,7 +310,7 @@ channel.summary <- function(d){
 }
 
 
-single.flowcell <- function(input.file, output.dir, q=8){
+single.flowcell <- function(input.file, output.dir, q=7){
     # wrapper function to analyse data from a single flowcell
     # input.file is a sequencing_summary.txt file from a 1D run
     # output.dir is the output directory into which to write results
@@ -358,7 +362,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
     ggsave(filename = file.path(output.dir, "q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
-    p5 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
+    p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
         geom_point(size=1.5, alpha=0.35) + 
         scale_colour_viridis() + 
         labs(colour='Q')  + 
@@ -368,9 +372,21 @@ single.flowcell <- function(input.file, output.dir, q=8){
         xlab("Hours into run") +
         ylab("Read length") +
         theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
-    ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2500/75, height = 2400/75, plot = p5)
+    ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2500/75, height = 2400/75, plot = p3)
 
-    flog.info(paste(sep = "", flowcell, ": plotting flowcell yield summary"))
+
+    flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
+    p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time, colour = Q_cutoff)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
+        geom_line(size = 1) + 
+        xlab("Hours into run") +
+        ylab("Total yield in bases") +
+        scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = 960/75, height = 960/75, plot = p5)
+
+
+    flog.info(paste(sep = "", flowcell, ": plotting flowcell yield by read length"))
     p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length") +
@@ -379,7 +395,7 @@ single.flowcell <- function(input.file, output.dir, q=8){
         theme(text = element_text(size = 15))
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
     p6 = p6 + scale_x_continuous(limits = c(0, xmax))
-    ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
+    ggsave(filename = file.path(output.dir, "yield_by_length.png"), width = 960/75, height = 960/75, plot = p6)
     
     flog.info(paste(sep = "", flowcell, ": plotting sequence length over time"))
     p7 = ggplot(d, aes(x=start_time/3600, y=sequence_length_template, colour = Q_cutoff, group = Q_cutoff)) + 
@@ -592,8 +608,20 @@ multi.plots = function(dm, output.dir){
         xlab("Mean Q score of read") +
         ylab("Density")
     ggsave(filename = file.path(output.dir, "q_distributions.png"), width = 960/75, height = 960/75, plot = p2)
+
+
+    flog.info("Plotting flowcell yield over time")
+    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time, colour = flowcell)) + 
+        geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
+        geom_line(size = 1) + 
+        xlab("Hours into run") +
+        ylab("Total yield in bases") +
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
+        theme(text = element_text(size = 15))
+    ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = 960/75, height = 960/75, plot = p5)
+
         
-    flog.info("Plotting flowcell yield summary")
+    flog.info("Plotting flowcell yield by length")
     p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length") +
@@ -602,7 +630,7 @@ multi.plots = function(dm, output.dir){
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     xmax = max(dm$sequence_length_template[which(dm$cumulative.bases > 0.01 * max(dm$cumulative.bases))])
     p6 = p6 + scale_x_continuous(limits = c(0, xmax))
-    ggsave(filename = file.path(output.dir, "yield_summary.png"), width = 960/75, height = 960/75, plot = p6)
+    ggsave(filename = file.path(output.dir, "yield_by_length.png"), width = 960/75, height = 960/75, plot = p6)
     
 
     flog.info("Plotting sequence length over time")
