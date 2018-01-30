@@ -46,6 +46,7 @@ parser <- add_option(parser,
                      opt_str = c("-o", "--outputdirectory"), 
                      type = "character",
                      dest = 'output.dir',
+                     default=NA,
                      help="Output directory (required). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file"
                      )
 
@@ -67,6 +68,10 @@ parser <- add_option(parser,
 
 opt = parse_args(parser)
 
+# output == intput unless otherwise specified
+
+
+if(is.na(opt$output.dir)){ opt$output.dir = opt$input.file }
 input.file = opt$input.file
 output.dir = opt$output.dir
 q = opt$q
