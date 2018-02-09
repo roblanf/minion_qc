@@ -77,6 +77,12 @@ parser <- add_option(parser,
 
 opt = parse_args(parser)
 
+if (length(opt$input.file)==1) {
+    input.file = opt$input.file
+} else {
+  stop("Input file parameter must be supplied via -i or --input. See script usage (--help) or readme for help: https://github.com/roblanf/minion_qc")
+}
+
 # output == intput unless otherwise specified
 if(is.na(opt$output.dir)){ 
     opt$output.dir = opt$input.file 
