@@ -66,6 +66,15 @@ parser <- add_option(parser,
                      help="Number of processors to use for the anlaysis (default 1). Only helps when you are analysing more than one sequencing_summary.txt file at a time"
                      )
 
+parser <- add_option(parser, 
+                     opt_str = c("-f", "--figuresize"), 
+                     type = "double",
+                     default=1.0,
+                     dest = 'fig.size',
+                     help="A multiplier for the size of the figures (default 1.0). The default of 1.0 produces figures that are carefully optimised to look good on a standard laptop screen or bigger. Above 1.0 will produce larger figures relative to the font size, smaller than one will produce smaller figures relative to the font size (e.g. for publications or presentations). For some plots, small values of f may cause fonts to be too large relative to plots"
+                     )
+
+
 opt = parse_args(parser)
 
 # output == intput unless otherwise specified
@@ -76,10 +85,10 @@ if(is.na(opt$output.dir)){
     }
 }
 
-input.file = opt$input.file
 output.dir = opt$output.dir
 q = opt$q
 cores = opt$cores
+fig.size = opt$fig.size
 
 # this is how we label the reads at least as good as q
 q_title = paste("Q>=", q, sep="")
@@ -358,7 +367,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         xlab("Read length") +
         ylab("Number of reads") +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
-    ggsave(filename = file.path(output.dir, "length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
+    ggsave(filename = file.path(output.dir, "length_histogram.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p1)
 
     flog.info(paste(sep = "", flowcell, ": plotting mean Q score histogram"))
     p2 = ggplot(d, aes(x = mean_qscore_template, fill = Q_cutoff)) + 
@@ -368,7 +377,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         xlab("Mean Q score of read") +
         ylab("Number of reads") +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
-    ggsave(filename = file.path(output.dir, "q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
+    ggsave(filename = file.path(output.dir, "q_histogram.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p2)
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
     p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
@@ -381,7 +390,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         xlab("Hours into run") +
         ylab("Read length") +
         theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
-    ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2500/75, height = 2400/75, plot = p3)
+    ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = fig.size*2500/75, height = fig.size*2400/75, plot = p3)
 
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
@@ -392,7 +401,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         ylab("Total yield in bases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
-    ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = 960/75, height = 960/75, plot = p5)
+    ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p5)
 
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield by read length"))
@@ -404,7 +413,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         theme(text = element_text(size = 15))
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
     p6 = p6 + scale_x_continuous(limits = c(0, xmax))
-    ggsave(filename = file.path(output.dir, "yield_by_length.png"), width = 960/75, height = 960/75, plot = p6)
+    ggsave(filename = file.path(output.dir, "yield_by_length.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p6)
     
     flog.info(paste(sep = "", flowcell, ": plotting sequence length over time"))
     p7 = ggplot(d, aes(x=start_time/3600, y=sequence_length_template, colour = Q_cutoff, group = Q_cutoff)) + 
@@ -415,7 +424,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         ylab("Mean read length") + 
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         ylim(0, NA)
-    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
+    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p7)
     
     flog.info(paste(sep = "", flowcell, ": plotting Q score over time"))
     p8 = ggplot(d, aes(x=start_time/3600, y=mean_qscore_template, colour = Q_cutoff, group = Q_cutoff)) + 
@@ -426,7 +435,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         ylab("Mean Q score") + 
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         ylim(0, NA)
-    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)
+    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p8)
     
     flog.info(paste(sep = "", flowcell, ": plotting reads per hour"))
     f = d[c("hour", "reads_per_hour", "Q_cutoff")]
@@ -458,7 +467,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         ylab("Number of reads per hour") + 
         ylim(0, NA) + 
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads"))
-    ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = 960/75, height = 480/75, plot = p9)
+    ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p9)
     
     flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
     p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
@@ -472,7 +481,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         # a catch for 1D2 runs which don't have events per base
         p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
     }
-    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = 960/75, height = 960/75, plot = p10)
+    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p10)
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell channels summary histograms"))
     c = channel.summary(subset(d, Q_cutoff=="All reads"))
@@ -491,7 +500,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
         guides(fill=FALSE) +
         scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75) +
         guides(fill=FALSE)
-    ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 960/75, height = 480/75, plot = p11) 
+    ggsave(filename = file.path(output.dir, "channel_summary.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p11) 
     
     return(d)
 }
@@ -549,7 +558,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         xlab("Read length") +
         ylab("Number of reads") +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
-    ggsave(filename = file.path(output.dir, "combined_length_histogram.png"), width = 960/75, height = 960/75, plot = p1)
+    ggsave(filename = file.path(output.dir, "combined_length_histogram.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p1)
     
     flog.info("Plotting combined mean Q score histogram")
     p2 = ggplot(d, aes(x = mean_qscore_template, fill = Q_cutoff)) + 
@@ -559,7 +568,7 @@ combined.flowcell <- function(d, output.dir, q=8){
         xlab("Mean Q score of read") +
         ylab("Number of reads") +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
-    ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = 960/75, height = 960/75, plot = p2)
+    ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p2)
         
     flog.info("Plotting combined yield by length")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
@@ -571,7 +580,7 @@ combined.flowcell <- function(d, output.dir, q=8){
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
     p4 = p4 + scale_x_continuous(limits = c(0, xmax))
     
-    ggsave(filename = file.path(output.dir, "combined_yield_by_length.png"), width = 960/75, height = 960/75, plot = p4)
+    ggsave(filename = file.path(output.dir, "combined_yield_by_length.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p4)
     
 }
 
@@ -607,7 +616,7 @@ multi.plots = function(dm, output.dir){
         theme(text = element_text(size = 15)) +
         xlab("Read length") +
         ylab("Density")
-    ggsave(filename = file.path(output.dir, "length_distributions.png"), width = 960/75, height = 960/75, plot = p1)
+    ggsave(filename = file.path(output.dir, "length_distributions.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p1)
     
     flog.info("Plotting mean Q score distributions")
     p2 = ggplot(dm, aes(x = mean_qscore_template)) + 
@@ -616,7 +625,7 @@ multi.plots = function(dm, output.dir){
         theme(text = element_text(size = 15)) +
         xlab("Mean Q score of read") +
         ylab("Density")
-    ggsave(filename = file.path(output.dir, "q_distributions.png"), width = 960/75, height = 960/75, plot = p2)
+    ggsave(filename = file.path(output.dir, "q_distributions.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p2)
 
 
     flog.info("Plotting flowcell yield over time")
@@ -627,7 +636,7 @@ multi.plots = function(dm, output.dir){
         ylab("Total yield in bases") +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
         theme(text = element_text(size = 15))
-    ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = 960/75, height = 960/75, plot = p5)
+    ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p5)
 
         
     flog.info("Plotting flowcell yield by length")
@@ -639,7 +648,7 @@ multi.plots = function(dm, output.dir){
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     xmax = max(dm$sequence_length_template[which(dm$cumulative.bases > 0.01 * max(dm$cumulative.bases))])
     p6 = p6 + scale_x_continuous(limits = c(0, xmax))
-    ggsave(filename = file.path(output.dir, "yield_by_length.png"), width = 960/75, height = 960/75, plot = p6)
+    ggsave(filename = file.path(output.dir, "yield_by_length.png"), width = fig.size*960/75, height = fig.size*960/75, plot = p6)
     
 
     flog.info("Plotting sequence length over time")
@@ -652,7 +661,7 @@ multi.plots = function(dm, output.dir){
         ylim(0, NA) +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         scale_colour_hue(guide = guide_legend(title = "Reads"))
-    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = 960/75, height = 480/75, plot = p7)
+    ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p7)
     
 
     flog.info("Plotting Q score over time")
@@ -664,7 +673,7 @@ multi.plots = function(dm, output.dir){
         ylab("Mean Q score") + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         scale_colour_hue(guide = guide_legend(title = "Reads"))
-    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = 960/75, height = 480/75, plot = p8)    
+    ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = fig.size*960/75, height = fig.size*480/75, plot = p8)    
     
 }
 
