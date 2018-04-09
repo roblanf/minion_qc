@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-# MinionQC version 1.0
+# MinIONQC version 1.0
 # Copyright (C) 2017 Robert Lanfear
 #
 # This program is free software: you can redistribute it and/or modify it under
@@ -71,7 +71,7 @@ parser <- add_option(parser,
                      type = "logical",
                      default = FALSE,
                      dest = 'smallfig',
-                     help="TRUE or FALSE (the default). When true, MinionQC will output smaller figures, e.g. suitable for publications or presentations. The default is to produce larger figures optimised for display on screen. Some figures just require small text, and cannot be effectively resized."
+                     help="TRUE or FALSE (the default). When true, MinIONQC will output smaller figures, e.g. suitable for publications or presentations. The default is to produce larger figures optimised for display on screen. Some figures just require small text, and cannot be effectively resized."
                      )
 
 
@@ -608,7 +608,7 @@ multi.flowcell = function(input.file, output.base, q){
     dir.create(output.base)
     flowcell = basename(dirname(input.file))
     dir.create(file.path(output.base, flowcell))
-    output.dir = file.path(output.base, flowcell, "minionQC")
+    output.dir = file.path(output.base, flowcell, "MinIONQC")
     d = single.flowcell(input.file, output.dir, q)
     return(d)
     
