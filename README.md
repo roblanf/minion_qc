@@ -47,16 +47,19 @@ Options:
     Show this help message and exit
 
   -i INPUT, --input=INPUT
-    Input file or directory (required). Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively for files named 'sequencing_summary.txt'.
+    Input file or directory (required). Either a full path to a sequence_summary.txt file, or a full path to a directory containing one or more such files. In the latter case the directory is searched recursively.
 
   -o OUTPUTDIRECTORY, --outputdirectory=OUTPUTDIRECTORY
-    Output directory (optional: defaults to the same as the input directory). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file. A separate directory called 'combinedQC' will contain plots and data on all flowcells combined.
+    Output directory (optional, default is the same as the input directory). If a single sequencing_summary.txt file is passed as input, then the output directory will contain just the plots associated with that file. If a directory containing more than one sequencing_summary.txt files is passed as input, then the plots will be put into sub-directories that have the same names as the parent directories of each sequencing_summary.txt file
 
   -q QSCORE_CUTOFF, --qscore_cutoff=QSCORE_CUTOFF
     The cutoff value for the mean Q score of a read (default 7). Used to create separate plots for reads above and below this threshold
 
   -p PROCESSORS, --processors=PROCESSORS
     Number of processors to use for the anlaysis (default 1). Only helps when you are analysing more than one sequencing_summary.txt file at a time
+
+  -s SMALLFIGURES, --smallfigures=SMALLFIGURES
+    TRUE or FALSE (the default). When true, MinionQC will output smaller figures, e.g. suitable for publications or presentations. The default is to produce larger figures optimised for display on screen. Some figures just require small text, and cannot be effectively resized.
 ```
 
 ## Installation
@@ -102,16 +105,17 @@ install.packages("yaml")
 If you want to run the example input, one option is to change directories to the file containing the `MinonQC.R` script and type:
 
 ```
-Rscript MinionQC.R -i example_input -o my_example_output -p 2
+Rscript MinionQC.R -i example_input -o my_example_output -p 2 
 ```
-
 
 ## Output details
 The following output was created by running the script on the example input files, which contains data from two flowcells from our lab.
 
 ```
-Rscript MinionQC.R -i example_input -o example_output
+Rscript MinionQC.R -i example_input -o example_output -s TRUE -p 2
 ```
+
+This runs the analysis with two processors, and produces smaller plots suitable for presentations or papers (where possible). The defualt (i.e. removing the `-s` option above) is to produce larger plots designed for viewing on full size monitors.
 
 Two kinds of output are produced. Output for each flowcell, and then additional output for the combined flowcells to allow for comparison. The script will produce 10 files to describe each flowcell, and 9 files to describe all flowcells combined (if you have analysed more than one flowcell). I explain each of these files below, with examples from the `example_output/RB7_A2/minionQC/` folder for a single flowcell, and examples from the `example_output/combinedQC/` folder for multiple flowcells. 
 
