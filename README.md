@@ -32,10 +32,12 @@ To run it on a directory with multiple `sequencing_summary.txt` files, make sure
 Rscript MinIONQC.R -i path/to/parent_directory
 ```
 
-* **MinIONQC.R**: path to this script
-* **path/to/parent_directory**: path to an input directory that contains one or more `sequencing_summary.txt` files in sub-directories
+* `MinIONQC.R`: path to this script
+* `path/to/parent_directory`: path to an input directory that contains one or more `sequencing_summary.txt` files in sub-directories
 
 You'll see a series of plots in the output directory, and a YAML file that describes your output. These, and other command line options, are described below.
+
+Note: for direct RNA runs, any reads from the control RNA sequence (i.e. anything in your summary file labelled "YHR174W") are removed prior to analysis.
 
 ## Commandline options
 

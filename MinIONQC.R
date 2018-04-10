@@ -167,8 +167,14 @@ load_summary <- function(filepath, min.q){
                                                 mean_qscore_template = 'n',
                                                 sequence_length_2d = 'i',
                                                 mean_qscore_2d = 'n',
-                                                start_time = 'n'))
+                                                start_time = 'n',
+                                                calibration_strand_genome_template = 'c'))
     
+    # remove the control sequence from directRNA runs
+    if("calibration_strand_genome_template" %in% names(d)){
+        d = subset(d, calibration_strand_genome_template != "YHR174W")
+    }
+
     if("sequence_length_2d" %in% names(d)){
         # it's a 1D2 or 2D run
         d$sequence_length_template = as.numeric(as.character(d$sequence_length_2d))

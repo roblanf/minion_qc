@@ -65,3 +65,17 @@ test_that('1D2 run works', {
     d = single.flowcell(test_f, test_d, 8)
     
 })
+
+
+### direct RNA test
+test_rna = "~/Documents/github/minion_qc/testfiles/directRNA/Direct_RNA_sequencing_summary.txt"
+
+d = load_summary(test_rna, min.q=c(-Inf, 7))
+
+test_that('bases.gt works', {
+    expect_equal(bases.gt(d, 100), 200)
+    expect_equal(bases.gt(d, 0), 950)
+    expect_equal(bases.gt(d, 10), 950)
+    expect_equal(bases.gt(d, 50), 850)
+})
+

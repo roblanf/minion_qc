@@ -1,0 +1,57 @@
+input file: /Users/roblanfear/Documents/github/minion_qc/testfiles/directRNA/Direct_RNA_sequencing_summary.txt
+All reads:
+  total.gigabases: 0.0001974
+  total.reads: 963
+  N50.length: 385.0
+  mean.length: 205.0
+  median.length: 167.0
+  max.length: 1282.0
+  mean.q: 4.6
+  median.q: 5.9
+  reads:
+    '>10kb': 0
+    '>20kb': 0
+    '>50kb': 0
+    '>100kb': 0
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 0.0e+00
+  gigabases:
+    '>10kb': 0.0e+00
+    '>20kb': 0.0e+00
+    '>50kb': 0.0e+00
+    '>100kb': 0.0e+00
+    '>200kb': 0.0e+00
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0e+00
+Q>=7:
+  total.gigabases: 0.0001101
+  total.reads: 220
+  N50.length: 604.0
+  mean.length: 500.6
+  median.length: 458.0
+  max.length: 1282.0
+  mean.q: 8.0
+  median.q: 7.9
+  reads:
+    '>10kb': 0
+    '>20kb': 0
+    '>50kb': 0
+    '>100kb': 0
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 0.0e+00
+  gigabases:
+    '>10kb': 0.0e+00
+    '>20kb': 0.0e+00
+    '>50kb': 0.0e+00
+    '>100kb': 0.0e+00
+    '>200kb': 0.0e+00
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0e+00
+notes: ultralong reads refers to the largest set of reads with N50>100KB
+
