@@ -374,6 +374,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
 
     # set up variable sizes
     if(smallfig == TRUE){ p1m = 0.5 }else{ p1m = 1.0 }
+    if(smallfig == TRUE){ p2m = 0.6 }else{ p2m = 1.0 }
 
     
     # make plots
@@ -419,7 +420,6 @@ single.flowcell <- function(input.file, output.dir, q=7){
         ylab("Total yield in bases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
-    if(smallfig == TRUE){ p4m = 0.5 }else{ p4m = 1.0 }
     ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = p1m*960/75, height = p1m*480/75, plot = p5) #
 
 
@@ -500,7 +500,8 @@ single.flowcell <- function(input.file, output.dir, q=7){
         # a catch for 1D2 runs which don't have events per base
         p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
     }
-    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = p1m*960/75, height = p1m*960/75, plot = p10) #
+    # we keep it a bit wider, because the legend takes up a fair bit of the plot space
+    ggsave(filename = file.path(output.dir, "length_vs_q.png"), width = p2m*960/75, height = p1m*960/75, plot = p10) #
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell channels summary histograms"))
     c = channel.summary(subset(d, Q_cutoff=="All reads"))
