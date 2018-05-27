@@ -79,13 +79,16 @@ opt = parse_args(parser)
 
 if (length(opt$input.file)==1) {
     input.file = opt$input.file
+} else if (length(test.file)==1) {
+    input.file = test.file # specifically for testing the script
+    flog.info(paste("Using test file", test.file))
 } else {
-  stop("Input file parameter must be supplied via -i or --input. See script usage (--help) or readme for help: https://github.com/roblanf/minion_qc")
+    stop("Input file parameter must be supplied via -i or --input. See script usage (--help) or readme for help: https://github.com/roblanf/minion_qc")
 }
 
 # output == intput unless otherwise specified
 if(is.na(opt$output.dir)){ 
-    opt$output.dir = opt$input.file 
+    opt$output.dir = input.file 
     if(file_test("-f", opt$output.dir)==TRUE){
         opt$output.dir = dirname(opt$output.dir)
     }
@@ -705,10 +708,10 @@ multi.plots = function(dm, output.dir){
 
 # Choose how to act depending on whether we have a single input file or mulitple input files
 
-if(file_test("-f", input.file)==TRUE){
+if(file_test("-f", input.file)==TRUE & length(test.file)<1){
     # if it's an existing file (not a folder) just run one analysis
     d = single.flowcell(input.file, output.dir, q)
-}else if(file_test("-d", input.file)==TRUE){
+}else if(file_test("-d", input.file)==TRUE & length(test.file)<1){
     # it's a directory, recursively analyse all sequencing_summary.txt files
   
     # get a list of all sequencing_summary.txt files, recursively

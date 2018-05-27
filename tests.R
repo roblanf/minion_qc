@@ -1,9 +1,9 @@
 library(testthat)
 
+test.file = "~/Documents/github/minion_qc/testfiles/test1.txt"
 source("~/Documents/github/minion_qc/MinionQC.R")
-test_d = "~/Documents/github/minion_qc/testfiles/test1.txt"
 
-d = load_summary(test_d, min.q=c(-Inf, 7))
+d = load_summary(test.file, min.q=c(-Inf, 7))
 
 test_that('Q cutoff in load_summary work', {
     expect_equal(as.numeric(table(d$Q_cutoff)), c(10, 5))   
@@ -52,17 +52,17 @@ test_that('summary function works', {
 
 test_that('short run works', {
 
-    test_d = "~/Documents/github/minion_qc/testfiles/short_run/"
+    test.file = "~/Documents/github/minion_qc/testfiles/short_run/"
     test_f = "~/Documents/github/minion_qc/testfiles/short_run/sequencing_summary.txt"
-    d = single.flowcell(test_f, test_d, 8)
+    d = single.flowcell(test_f, test.file, 8)
 
 })
 
 test_that('1D2 run works', {
     
-    test_d = "~/Documents/github/minion_qc/testfiles/1D2/"
+    test.file = "~/Documents/github/minion_qc/testfiles/1D2/"
     test_f = "~/Documents/github/minion_qc/testfiles/1D2/sequencing_summary.txt"
-    d = single.flowcell(test_f, test_d, 8)
+    d = single.flowcell(test_f, test.file, 8)
     
 })
 
