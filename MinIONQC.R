@@ -708,10 +708,10 @@ multi.plots = function(dm, output.dir){
 
 # Choose how to act depending on whether we have a single input file or mulitple input files
 
-if(file_test("-f", input.file)==TRUE & length(test.file)<1){
+if(file_test("-f", input.file)==TRUE & length(test.file)>1){
     # if it's an existing file (not a folder) just run one analysis
     d = single.flowcell(input.file, output.dir, q)
-}else if(file_test("-d", input.file)==TRUE & length(test.file)<1){
+}else if(file_test("-d", input.file)==TRUE & length(test.file)>1){
     # it's a directory, recursively analyse all sequencing_summary.txt files
   
     # get a list of all sequencing_summary.txt files, recursively
@@ -745,7 +745,7 @@ if(file_test("-f", input.file)==TRUE & length(test.file)<1){
     
 }else{
     #WTF
-    flog.warn(paste("Could find a sequencing summary file in your input which was: ", 
+    flog.warn(paste("Couldn't find a sequencing summary file in your input which was: ", 
         input.file, 
         "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
 }
