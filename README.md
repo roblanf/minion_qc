@@ -77,7 +77,7 @@ Or you can get it with `curl` or `wget`:
 ```shell
 curl https://raw.githubusercontent.com/roblanf/minion_qc/master/MinIONQC.R > MinIONQC.R
 
-wget https://raw.githubusercontent.com/roblanf/minion_qc/master/MinIONQC.R > MinIONQC.R
+wget https://raw.githubusercontent.com/roblanf/minion_qc/master/MinIONQC.R -O MinIONQC.R
 ```
 
 **To get the script as well as the example input and output**
