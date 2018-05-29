@@ -90,7 +90,7 @@ if (length(opt$input.file)==1) {
     stop("Input file parameter must be supplied via -i or --input. See script usage (--help) or readme for help: https://github.com/roblanf/minion_qc")
 }
 
-# output == intput unless otherwise specified
+# output == input unless otherwise specified
 if(is.na(opt$output.dir)){ 
     opt$output.dir = input.file 
     if(file_test("-f", opt$output.dir)==TRUE){
@@ -360,6 +360,8 @@ single.flowcell <- function(input.file, output.dir, q=7){
 
     flowcell = unique(d$flowcell)
 
+    
+    
     flog.info(paste(sep = "", flowcell, ": creating output directory:", output.dir))
     dir.create(output.dir)
     out.txt = file.path(output.dir, "summary.yaml")

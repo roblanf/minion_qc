@@ -1,0 +1,1 @@
+To test that the script works with highly nested input sequencing_summary.txt files, and that it works when the nesting is not consistent.
