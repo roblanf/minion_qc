@@ -90,15 +90,6 @@ if (length(opt$input.file)==1) {
     stop("Input file parameter must be supplied via -i or --input. See script usage (--help) or readme for help: https://github.com/roblanf/minion_qc")
 }
 
-# output == input unless otherwise specified
-if(is.na(opt$output.dir)){ 
-    opt$output.dir = input.file 
-    if(file_test("-f", opt$output.dir)==TRUE){
-        opt$output.dir = dirname(opt$output.dir)
-    }
-}
-
-output.dir = opt$output.dir
 q = opt$q
 cores = opt$cores
 smallfig = opt$smallfig
@@ -350,20 +341,29 @@ channel.summary <- function(d){
 }
 
 
-single.flowcell <- function(input.file, output.dir, q=7){
+single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     # wrapper function to analyse data from a single flowcell
     # input.file is a sequencing_summary.txt file from a 1D run
     # output.dir is the output directory into which to write results
     # q is the cutoff used for Q values, set by the user
+    # base.dir is the base directory if and only if the user supplied a base directory
+    # we use base.dir to name flowcells in a sensible way
     flog.info(paste("Loading input file:", input.file))
     d = load_summary(input.file, min.q=c(-Inf, q))
 
     flowcell = unique(d$flowcell)
 
     
+    # output goes with the sequencing summary file unless otherwise specified
+    if(is.na(opt$output.dir)){ 
+        output.dir = file.path(dirname(input.file))
+    } else {
+        # the user supplied an output dir
+        output.dir = file.path(opt$output.dir, flowcell)
+    }
     
     flog.info(paste(sep = "", flowcell, ": creating output directory:", output.dir))
-    dir.create(output.dir)
+    dir.create(output.dir, recursive = TRUE)
     out.txt = file.path(output.dir, "summary.yaml")
     
     flog.info(paste(sep = "", flowcell, ": summarising input file for flowcell"))
@@ -538,7 +538,7 @@ single.flowcell <- function(input.file, output.dir, q=7){
 combined.flowcell <- function(d, output.dir, q=8){
     # function to analyse combined data from multiple flowcells
     # useful for getting an overall impression of the combined data
-    
+
     flog.info("Creating output directory")
     out.txt = file.path(output.dir, "summary.yaml")
     
@@ -621,10 +621,6 @@ multi.flowcell = function(input.file, output.base, q){
     # wrapper function to allow parallelisation of single-flowcell 
     # analyses when >1 flowcell is analysed in one run
     
-    dir.create(output.base)
-    flowcell = basename(dirname(input.file))
-    dir.create(file.path(output.base, flowcell))
-    output.dir = file.path(output.base, flowcell, "MinIONQC")
     d = single.flowcell(input.file, output.dir, q)
     return(d)
     
@@ -741,9 +737,15 @@ if(file_test("-f", input.file)==TRUE & length(test.file)>1){
         dm = as.data.frame(rbindlist(results))
 
         # now do the single plot on ALL the output
-        combined.output = file.path(output.dir, "combinedQC")
+        if(is.na(opt$output.dir)){ 
+            combined.output = file.path(input.file, "combinedQC")
+        } else {
+            # the user supplied an output dir
+            combined.output = file.path(opt$output.dir, "combinedQC")
+        }
+        
         flog.info(paste("Plots from the combined output will be saved in", combined.output))
-        dir.create(combined.output)
+        dir.create(combined.output, recursive = TRUE)
         combined.flowcell(dm, combined.output, q)
         multi.plots(dm, combined.output)
         flog.info('**** Analysis complete ****')

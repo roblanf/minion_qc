@@ -26,11 +26,13 @@ To run it on one `sequencing_summary.txt` file, just point it to a single `seque
 Rscript MinIONQC.R -i path/to/sequencing_summary.txt
 ```
 
-To run it on a directory with multiple `sequencing_summary.txt` files, make sure that each file is called  `sequencing_summary.txt`, and is contained in a separate directory, then:
+To run it on a directory with multiple `sequencing_summary.txt` files, make sure that each file is called  `sequencing_summary.txt`, and is contained in a separate directory with a unique name (this will be used as the name of the flowcell), then:
 
 ```shell
 Rscript MinIONQC.R -i path/to/parent_directory
 ```
+
+The script will simply look for all `sequencing_summary.txt` files recursively in the parent directory, and incorporate all of them. 
 
 * `MinIONQC.R`: path to this script
 * `path/to/parent_directory`: path to an input directory that contains one or more `sequencing_summary.txt` files in sub-directories

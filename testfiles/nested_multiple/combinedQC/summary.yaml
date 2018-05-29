@@ -1,0 +1,57 @@
+input file: /Users/roblanfear/Documents/github/minion_qc/testfiles/nested_multiple/
+All reads:
+  total.gigabases: 0.0190624
+  total.reads: 12003
+  N50.length: 6732.0
+  mean.length: 1588.1
+  median.length: 0.0e+00
+  max.length: 21568.0
+  mean.q: 5.2
+  median.q: 0.0e+00
+  reads:
+    '>10kb': 276
+    '>20kb': 3
+    '>50kb': 0
+    '>100kb': 0
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 0.0e+00
+  gigabases:
+    '>10kb': 0.0032588
+    '>20kb': 6.4704e-05
+    '>50kb': 0.0e+00
+    '>100kb': 0.0e+00
+    '>200kb': 0.0e+00
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0e+00
+Q>=7:
+  total.gigabases: 0.0183097
+  total.reads: 4668
+  N50.length: 6710.0
+  mean.length: 3922.4
+  median.length: 3393.5
+  max.length: 21568.0
+  mean.q: 12.7
+  median.q: 13.0
+  reads:
+    '>10kb': 261
+    '>20kb': 3
+    '>50kb': 0
+    '>100kb': 0
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 0.0e+00
+  gigabases:
+    '>10kb': 0.0030637
+    '>20kb': 6.4704e-05
+    '>50kb': 0.0e+00
+    '>100kb': 0.0e+00
+    '>200kb': 0.0e+00
+    '>500kb': 0.0e+00
+    '>1m': 0.0e+00
+    ultralong: 0.0e+00
+notes: ultralong reads refers to the largest set of reads with N50>100KB
+
