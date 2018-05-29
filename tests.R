@@ -9,6 +9,7 @@ test_that('short_run works', {
 })
 
 # now we run tests to check the output goes where it should, with combinations of single and multiple input files and providing an output directory or not
+# these tests require you to watch the output
 test_that('nested_single without output specified works', {
     system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/nested_single/"))
 })
@@ -110,3 +111,4 @@ test_that('directRNA run works', {
     system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/directRNA/"))
     
 })
+

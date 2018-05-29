@@ -356,7 +356,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     
     # output goes with the sequencing summary file unless otherwise specified
     if(is.na(opt$output.dir)){ 
-        output.dir = file.path(dirname(input.file), "MinIONQC")
+        output.dir = file.path(dirname(input.file))
     } else {
         # the user supplied an output dir
         output.dir = file.path(opt$output.dir, flowcell)
