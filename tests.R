@@ -1,7 +1,12 @@
 library(testthat)
 
 test.file = "~/Documents/github/minion_qc/testfiles/test1.txt"
-source("~/Documents/github/minion_qc/MinionQC.R")
+mqc = "~/Documents/github/minion_qc/MinionQC.R"
+
+# first let's just run a full test because I've stuffed this up before: https://github.com/roblanf/minion_qc/issues/29 
+system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/short_run"))
+
+source(mqc)
 
 d = load_summary(test.file, min.q=c(-Inf, 7))
 
@@ -71,11 +76,11 @@ test_that('1D2 run works', {
 test_rna = "~/Documents/github/minion_qc/testfiles/directRNA/Direct_RNA_sequencing_summary.txt"
 
 d = load_summary(test_rna, min.q=c(-Inf, 7))
+d = subset(d, Q_cutoff == "All reads")
 
 test_that('bases.gt works', {
-    expect_equal(bases.gt(d, 100), 200)
-    expect_equal(bases.gt(d, 0), 950)
-    expect_equal(bases.gt(d, 10), 950)
-    expect_equal(bases.gt(d, 50), 850)
+    expect_equal(bases.gt(d, 0), 197413)
+    expect_equal(bases.gt(d, 1000), 17992)
+    expect_equal(bases.gt(d, 2000), 0)
 })
 

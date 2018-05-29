@@ -76,7 +76,11 @@ parser <- add_option(parser,
 
 
 opt = parse_args(parser)
-test.file = c(1, 2, 3) # dummy variable
+
+if(exists("test.file") == FALSE){
+    test.file = c(1, 2, 3) # dummy variable
+}
+
 if (length(opt$input.file)==1) {
     input.file = opt$input.file
 } else if (length(test.file)==1) {
