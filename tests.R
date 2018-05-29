@@ -4,7 +4,28 @@ test.file = "~/Documents/github/minion_qc/testfiles/test1.txt"
 mqc = "~/Documents/github/minion_qc/MinionQC.R"
 
 # first let's just run a full test because I've stuffed this up before: https://github.com/roblanf/minion_qc/issues/34 
-system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/short_run"))
+test_that('short_run works', {
+    system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/short_run"))
+})
+
+# now we run tests to check the output goes where it should, with combinations of single and multiple input files and providing an output directory or not
+test_that('nested_single without output specified works', {
+    system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/nested_single/"))
+})
+
+test_that('nested_single with output specified works', {
+        system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/nested_single/ -o ~/Documents/github/minion_qc/testfiles/nested_single_testoutput"))
+})
+
+test_that('nested_multiple without output specified works', {
+        system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/nested_multiple/ -p 3"))
+})
+
+test_that('nested_multiple with output specified works', {
+        system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/nested_single/ -o ~/Documents/github/minion_qc/testfiles/nested_multiple_testoutput -p 3"))
+})
+
+
 
 source(mqc)
 
@@ -84,3 +105,8 @@ test_that('bases.gt works', {
     expect_equal(bases.gt(d, 2000), 0)
 })
 
+test_that('directRNA run works', {
+    
+    system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/directRNA/"))
+    
+})
