@@ -3,7 +3,7 @@ library(testthat)
 test.file = "~/Documents/github/minion_qc/testfiles/test1.txt"
 mqc = "~/Documents/github/minion_qc/MinionQC.R"
 
-# first let's just run a full test because I've stuffed this up before: https://github.com/roblanf/minion_qc/issues/29 
+# first let's just run a full test because I've stuffed this up before: https://github.com/roblanf/minion_qc/issues/34 
 system(paste("Rscript", mqc, "-i", "~/Documents/github/minion_qc/testfiles/short_run"))
 
 source(mqc)
