@@ -1,4 +1,4 @@
-input file: ~/Documents/github/minion_qc/testfiles/short_run/sequencing_summary.txt
+input file: /Users/roblanfear/Documents/github/minion_qc/testfiles/short_run/sequencing_summary.txt
 All reads:
   total.gigabases: 0.0010896
   total.reads: 99
@@ -27,17 +27,17 @@ All reads:
     '>1m': 0.0e+00
     ultralong: 0.0e+00
 Q>=7:
-  total.gigabases: 0.0009699
-  total.reads: 76
-  N50.length: 18946.0
-  mean.length: 12761.6
+  total.gigabases: 0.0010707
+  total.reads: 86
+  N50.length: 18145.0
+  mean.length: 12450.2
   median.length: 10733.5
   max.length: 34310.0
-  mean.q: 11.6
-  median.q: 11.8
+  mean.q: 11.1
+  median.q: 11.6
   reads:
-    '>10kb': 41
-    '>20kb': 18
+    '>10kb': 46
+    '>20kb': 19
     '>50kb': 0
     '>100kb': 0
     '>200kb': 0
@@ -45,8 +45,8 @@ Q>=7:
     '>1m': 0
     ultralong: 0.0e+00
   gigabases:
-    '>10kb': 0.0007927
-    '>20kb': 0.0004439
+    '>10kb': 0.0008712
+    '>20kb': 0.0004697
     '>50kb': 0.0e+00
     '>100kb': 0.0e+00
     '>200kb': 0.0e+00

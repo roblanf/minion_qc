@@ -18,6 +18,7 @@
 # supress warnings
 options(warn=-1)
 
+
 library(ggplot2)
 suppressPackageStartupMessages(library(viridis))
 library(plyr)
@@ -29,6 +30,25 @@ library(parallel)
 library(futile.logger)
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(optparse))
+
+
+# attempt to get around occasional issues with png: https://github.com/roblanf/minion_qc/issues/28
+tryCatch(
+    {
+        png("abc")
+    },
+    error=function(cond) {
+        flog.warn("Looks like the standard png() doesn't work on this system")
+        flog.warn("Here's the original error")
+        flog.warn(cond)
+        flog.warn("MinIONQC will attempt to use options(bitmapType='cairo')")
+        flog.warn("If this doesn't work, you might not see any plots at all. In this case please make sure that your system is able to ouput PNGs and try again")
+        flog.warn("This might help: https://stackoverflow.com/questions/24999983/r-unable-to-start-device-png-capabilities-has-true-for-png")
+        options(bitmapType='cairo')
+    }
+)
+
+
 
 
 # option parsing #
