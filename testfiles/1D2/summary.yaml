@@ -1,6 +1,6 @@
 input file: ~/Documents/github/minion_qc/testfiles/1D2/sequencing_summary.txt
 All reads:
-  total.gigabases: 0.9302495
+  total.gigabases: 0.930249
   total.reads: 159799
   N50.length: 7937.0
   mean.length: 5821.4
@@ -27,7 +27,7 @@ All reads:
     '>1m': 0.0e+00
     ultralong: 0.0e+00
 Q>=7:
-  total.gigabases: 0.9301052
+  total.gigabases: 0.930105
   total.reads: 158952
   N50.length: 7937.0
   mean.length: 5851.5
@@ -45,8 +45,8 @@ Q>=7:
     '>1m': 0
     ultralong: 0.0e+00
   gigabases:
-    '>10kb': 0.2497112
-    '>20kb': 0.0069372
+    '>10kb': 0.249711
+    '>20kb': 0.006937
     '>50kb': 5.4577e-05
     '>100kb': 0.0e+00
     '>200kb': 0.0e+00
