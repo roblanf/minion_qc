@@ -18,17 +18,19 @@
 # supress warnings
 options(warn=-1)
 
-library(ggplot2)
+suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(viridis))
-library(plyr)
-library(reshape2)
-library(readr)
-library(yaml)
-library(scales)
-library(parallel)
-library(futile.logger)
+suppressPackageStartupMessages(library(plyr))
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(readr))
+suppressPackageStartupMessages(library(yaml))
+suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(parallel))
+suppressPackageStartupMessages(library(futile.logger))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(optparse))
+
+
 
 
 # option parsing #
