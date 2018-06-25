@@ -120,7 +120,7 @@ Rscript MinIONQC.R -i example_input -o example_output -s TRUE -p 2
 
 This runs the analysis with two processors, and produces smaller plots suitable for presentations or papers (where possible). The defualt (i.e. removing the `-s` option above) is to produce larger plots designed for viewing on full size monitors.
 
-Two kinds of output are produced. Output for each flowcell, and then additional output for the combined flowcells to allow for comparison. The script will produce 10 files to describe each flowcell, and 9 files to describe all flowcells combined (if you have analysed more than one flowcell). I explain each of these files below, with examples from the `example_output/RB7_A2/MinIONQC/` folder for a single flowcell, and examples from the `example_output/combinedQC/` folder for multiple flowcells. 
+Two kinds of output are produced. Output for each flowcell, and then additional output for the combined flowcells to allow for comparison. The script will produce 10 files to describe each flowcell, and 9 files to describe all flowcells combined (if you have analysed more than one flowcell). I explain each of these files below, with examples from the `example_output/RB7_A2/` folder for a single flowcell, and examples from the `example_output/combinedQC/` folder for multiple flowcells. 
 
 There are two main colour schemes used in the plots:
 
@@ -196,46 +196,46 @@ notes: ultralong reads refers to the largest set of reads with N50>100KB
 
 #### length_histogram.png
 Read length on a log10 scale (x-axis) vs counts (y-axis). This is a standard plot for long-read sequencing. Although it's obviously useful, it still doesn't tell you how much data (i.e. your total yield) you have for reads above a given length though. For that, see the `yield_by_length` and `yield_over_time` plots. Of note in our data are the large number of very short reads. We don't think these are actually DNA fragments. Instead, we think they are contaminant molecules blocking pores (see below for more on this). In any case, it is exactly this kind of observation that led us to continue developing these QC tools. Knowing what's holding your performance back is key to getting better. 
-![length_histogram](example_output/RB7_A2/MinIONQC/length_histogram.png)
+![length_histogram](example_output/RB7_A2/length_histogram.png)
 
 #### q_histogram.png
 Mean Q score for a read (x-axis) vs counts (y-axis). We frequently observe a collection of 'good' reads with Q scores greater than about 7, and a collection of 'bad' reads, which Q scores that cluster around 4. Typically, one might filter the 'bad' reads out before assembly, but there's good evidence in the literature that they contain useful information if you treat them right.
-![q_histogram](example_output/RB7_A2/MinIONQC/q_histogram.png)
+![q_histogram](example_output/RB7_A2/q_histogram.png)
 
 #### length_vs_q.png
 Read length on a log10 scale (x-axis) vs mean Q score (y-axis). Points are coloured by the events per base. 'Good' reads are ~1.5 events per base, and 'bad' reads are >>1.5 events per base. We often see a group of very short, 'bad', low-quality reads. We think this is something to do with our DNA extractions, becuase not everybody gets the same thing. In this plot, the point size, transperency, and plot size are always the same no matter the input data. This facilitates comparison of these plots among flowcells and labs - those with more reads will look darker because there will be more points. If you have a 1D2 run, there will be no colours on this plot, because Albacore doesn't report the number of events per read when it combines the two reads of a 1D2 run into a single read.
-![length_vs_q](example_output/RB7_A2/MinIONQC/length_vs_q.png)
+![length_vs_q](example_output/RB7_A2/length_vs_q.png)
 
 #### length_by_hour.png
 The mean read length (y-axis) over time (x-axis). This let's you see if you are running out of longer reads as the run progresses. Muxes, which occur every 8 hours, are shown as red dashed lines.
-![length_by_hour](example_output/RB7_A2/MinIONQC/length_by_hour.png)
+![length_by_hour](example_output/RB7_A2/length_by_hour.png)
 
 #### q_by_hour.png
 The mean Q score (y-axis) over time (x-axis). We often see that our Q scores drop noticably over time - presumably this is a result of the pores wearing out, or the DNA accumulating damage, or both. Muxes, which occur every 8 hours, are shown as red dashed lines
-![q_by_hour](example_output/RB7_A2/MinIONQC/q_by_hour.png)
+![q_by_hour](example_output/RB7_A2/q_by_hour.png)
 
 #### reads_per_hour.png
 The number of reads (y-axis) obtained in each hour (x-axis). Muxes (every 8 hours) are plotted as red dashed lines. You can typically see that each mux results in a noticable increase in the number of reads per hour. 
-![q_by_hour](example_output/RB7_A2/MinIONQC/reads_per_hour.png)
+![q_by_hour](example_output/RB7_A2/reads_per_hour.png)
 
 #### yield_by_length.png
 The total yield in bases (y-axis) for any given minimum read length (x-axis). This is just like the 'reads' table in the `summary.yaml` output, but done across all read lengths up to the read length that includes 99% of the total yield. For example, to read off the amount of bases you have sequenced from reads of at least 25KB, just go up from 25KB on the x-axis to the line, then left to the y-axis, and you should get an answer of ~2.5GB. This can be particularly useful when your aim is to achieve a particular total yield of reads longer than some predefined length from a series of flowcells. This is often the case for genome sequencing projects. 
-![yield_by_length](example_output/RB7_A2/MinIONQC/yield_by_length.png)
+![yield_by_length](example_output/RB7_A2/yield_by_length.png)
 
 
 #### yield_over_time.png
 The total yield (y-axis) over the time that the flowcell was run. This can help to identify any issues that occurred during the run of a particular flowcell. Muxes are shown as dashed red lines. This one looks fine, and shows the expected boosts from each mux.  
-![yield_over_time](example_output/RB7_A2/MinIONQC/yield_over_time.png)
+![yield_over_time](example_output/RB7_A2/yield_over_time.png)
 
 
 #### channel_summary.png
 Histograms of total bases, total reads, mean read length, and median read length that show the variance across the 512 available channels. Repeated for all data and reads with Q>10.
-![channel_summary](example_output/RB7_A2/MinIONQC/channel_summary.png)
+![channel_summary](example_output/RB7_A2/channel_summary.png)
 
 #### flowcell_overview.png
 The 512 channels are laid out as on the R9.5 flowcell. Each panel of the plot shows time on the x-axis, and read length on the y-axis. Points are coloured by the Q score. This gives a little insight into exactly what was going on in each of your channels over the course of the run. You'll notice that in the example output for `RB7_D3` (the second plot below) you can see clearly that there was a bubble on the right-hand-side of the flowcell. The other thing of note in these plots is the frequent (and sometimes extended) periods in which some pores produce only very short, very low quality 'reads'. Our current best guess is that this is due to residual contaminants in our DNA extractions blocking the pores. A blocked pore looks like a change in current. And if the blockage is persistent (e.g. a large molecule just sitting blocking the pore, occasionally letting some current through) this could produce exactly this kind of pattern. Hopefully you don't see this in your samples. We work with plants, so this is the best we've been able to do so far.
-![flowcell_channels_epb](example_output/RB7_A2/MinIONQC/flowcell_overview.png)
-![flowcell_channels_epb](example_output/RB7_D3/MinIONQC/flowcell_overview.png)
+![flowcell_channels_epb](example_output/RB7_A2/flowcell_overview.png)
+![flowcell_channels_epb](example_output/RB7_D3/flowcell_overview.png)
 
 ### Analysing multiple flowcells
 
