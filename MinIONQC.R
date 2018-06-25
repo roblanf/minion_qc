@@ -525,11 +525,10 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     cc$variable[which(cc$variable=="median.read.length")] = "Median read length per channel"
     p11 = ggplot(cc, aes(x = value, fill = Q_cutoff)) + geom_histogram(bins = 30) + 
         facet_grid(Q_cutoff~variable, scales = "free_x") + 
-        theme(text = element_text(size = 15), axis.text.x = element_text(angle = 90, hjust = 1)) +
+        theme(text = element_text(size = 15), axis.text.x = element_text(angle = 60, hjust = 1)) +
         guides(fill=FALSE) +
         scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75) +
-        guides(fill=FALSE) +
-        scale_x_continuous(labels = function(x) format(x, scientific = TRUE))
+        guides(fill=FALSE)
     ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 960/75, height = 480/75, plot = p11) 
     
     return(d)
