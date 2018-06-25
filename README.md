@@ -14,7 +14,7 @@
 
 This script will give you a range of diagnostic plots and data for quality control of sequencing data from Oxford Nanopore's MinION sequencer. 
 
-There are lots of tools that do related things, but they all focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this script is that it works directly with the `sequencing_summary.txt` files produced by the Albacore base caller. This makes `MinIONQC` a lot quicker than most other things out there. For example, it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
+There are lots of tools that do related things, but they all focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this script is that it works directly with the `sequencing_summary.txt` files produced by ONT's Albacore or Guppy base callers. This makes `MinIONQC` a lot quicker than most other things out there. For example, it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
 
 ## Quick start
 
@@ -91,17 +91,16 @@ Download the `.zip` or `.tar.gz` file from here: https://github.com/roblanf/mini
 To run the script, you will need a recent version of R, and the following packages. To install the right packages, just start up R and copy/paste the code below.
 
 ```R
-install.packages("data.table")
-install.packages("futile.logger")
-install.packages("ggplot2")
-install.packages("optparse")
-install.packages("plyr")
-install.packages("readr")
-install.packages("reshape2")
-install.packages("scales")
-install.packages("scales")
-install.packages("viridis")
-install.packages("yaml")
+install.packages(c("data.table", 
+                   "futile.logger",
+                   "ggplot2",
+                   "optparse",
+                   "plyr",
+                   "readr",
+                   "reshape2",
+                   "scales",
+                   "viridis".
+                   "yaml"))
 ```
 
 #### Running the examples
