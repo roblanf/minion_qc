@@ -99,7 +99,7 @@ install.packages(c("data.table",
                    "readr",
                    "reshape2",
                    "scales",
-                   "viridis".
+                   "viridis",
                    "yaml"))
 ```
 
