@@ -688,8 +688,7 @@ multi.plots = function(dm, output.dir){
         xlab("Hours into run") + 
         ylab("Mean read length") + 
         ylim(0, NA) +
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
-        scale_colour_hue(guide = guide_legend(title = "Reads"))
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = p1m*960/75, height = p1m*960/75, plot = p7)
     
 
@@ -700,8 +699,7 @@ multi.plots = function(dm, output.dir){
         geom_smooth() + 
         xlab("Hours into run") + 
         ylab("Mean Q score") + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
-        scale_colour_hue(guide = guide_legend(title = "Reads"))
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     ggsave(filename = file.path(output.dir, "q_by_hour.png"), width = p1m*960/75, height = p1m*960/75, plot = p8)    
     
 }
