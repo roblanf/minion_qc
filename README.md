@@ -14,11 +14,13 @@
 
 This script will give you a range of diagnostic plots and data for quality control of sequencing data from Oxford Nanopore's MinION sequencer. 
 
-There are lots of tools that do related things, but they all focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of this script is that it works directly with the `sequencing_summary.txt` files produced by ONT's Albacore or Guppy base callers. This makes `MinIONQC` a lot quicker than most other things out there. For example, it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
+There are lots of tools that do related things, but they mostly focus on getting data out of the fastq or fast5 files, which is slow and computationally intensive. The benefit of MinIONQC is that it works directly with the `sequencing_summary.txt` files produced by ONT's Albacore or Guppy base callers. This makes `MinIONQC` a lot quicker than most other things out there, and crucially allows the quick-and-easy comparison of data from multiple flowcells. For example, it takes about a minute to analyse a 4GB flowcell using a single processor on my laptop.
+
+If you don't already have `sequencing_summary.txt` files for your data, you can produce them very quickly with ONT's Albacore or Guppy basecallers.
 
 ## Quick start
 
-The input for the script is one or more `sequencing_summary.txt` files produced by Albacore1.x or 2.x, based on data from one or more MinION flowcells. 
+The input for the script is one or more `sequencing_summary.txt` files produced by ONT's Albacore or Guppy basecalles, based on data from one or more MinION flowcells. 
 
 To run it on one `sequencing_summary.txt` file, just point it to a single `sequencing_summary.txt` file like this:
 
