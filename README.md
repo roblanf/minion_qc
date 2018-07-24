@@ -9,6 +9,12 @@
   - [Analysing a single flowcell](https://github.com/roblanf/minion_qc#analysing-a-single-flowcell)
   - [Analysing multiple flowcells](https://github.com/roblanf/minion_qc#analysing-multiple-flowcells)
 
+## Citation
+
+If you use MinIONQC in your published work, please cite  
+
+R Lanfear, M Schalamun, D Kainer, W Wang, B Schwessinger (2018). MinIONQC: fast and simple quality control for MinION sequencing data, Bioinformatics, bty654
+https://doi.org/10.1093/bioinformatics/bty654
 
 ## What and Why?
 

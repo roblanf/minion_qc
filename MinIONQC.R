@@ -739,6 +739,9 @@ if(file_test("-f", input.file)==TRUE & length(test.file)>1){
         combined.flowcell(dm, combined.output, q)
         multi.plots(dm, combined.output)
         flog.info('**** Analysis complete ****')
+        flog.info('If you use MinIONQC in your published work, please cite:')
+        flog.info('R Lanfear, M Schalamun, D Kainer, W Wang, B Schwessinger (2018). MinIONQC: fast and simple quality control for MinION sequencing data, Bioinformatics, bty654')
+        flog.info('https://doi.org/10.1093/bioinformatics/bty654')
     }
     
 }else{
