@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # MinIONQC version 1.3.5
 # Copyright (C) 2017 onwards Robert Lanfear
