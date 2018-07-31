@@ -236,6 +236,21 @@ log10_minor_break = function (...){
     }
 }
 
+
+log10_major_break = function (...){
+    # function to add major breaks to a log10 graph
+    # hat-tip: https://stackoverflow.com/questions/30179442/plotting-minor-breaks-on-a-log-scale-with-ggplot
+    function(x) {
+        minx         = floor(min(log10(x), na.rm=T))-1;
+        maxx         = ceiling(max(log10(x), na.rm=T))+1;
+        n_major      = maxx-minx+1;
+        major_breaks = seq(minx, maxx, by=1)
+        return(10^(major_breaks))
+    }
+}
+
+
+
 binSearch <- function(min, max, df, t = 100000) {
     # binary search algorithm, thanks to https://stackoverflow.com/questions/46292438/optimising-a-calculation-on-every-cumulative-subset-of-a-vector-in-r/46303384#46303384
     # the aim is to return the number of reads in a dataset (df)
@@ -383,10 +398,10 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     flog.info(paste(sep = "", flowcell, ": plotting length histogram"))
     p1 = ggplot(d, aes(x = sequence_length_template, fill = Q_cutoff)) + 
         geom_histogram(bins = 300) + 
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
-        xlab("Read length") +
+        xlab("Read length (bases)") +
         ylab("Number of reads") +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, "length_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p1)) #
@@ -428,7 +443,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield by read length"))
     p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
-        xlab("Minimum read length") +
+        xlab("Minimum read length (bases)") +
         ylab("Total yield in bases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
@@ -442,7 +457,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         theme(text = element_text(size = 15)) +
         geom_smooth() + 
         xlab("Hours into run") + 
-        ylab("Mean read length") + 
+        ylab("Mean read length (bases)") + 
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         ylim(0, NA)
     suppressMessages(ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = p1m*960/75, height = p1m*480/75, plot = p7)) #
@@ -493,10 +508,10 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
     p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
         geom_point(alpha=0.05, size = 0.4) + 
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
         labs(colour='Events per base\n(log scale)\n')  + 
         theme(text = element_text(size = 15)) +
-        xlab("Read length") +
+        xlab("Read length (bases)") +
         ylab("Mean Q score of read")
     if(max(d$events_per_base, na.rm=T)>0){
         # a catch for 1D2 runs which don't have events per base
@@ -576,10 +591,10 @@ combined.flowcell <- function(d, output.dir, q=8){
     flog.info("Plotting combined length histogram")
     p1 = ggplot(d, aes(x = sequence_length_template, fill = Q_cutoff)) + 
         geom_histogram(bins = 300) + 
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
-        xlab("Read length") +
+        xlab("Read length (bases)") +
         ylab("Number of reads") +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, "combined_length_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p1))
@@ -597,7 +612,7 @@ combined.flowcell <- function(d, output.dir, q=8){
     flog.info("Plotting combined yield by length")
     p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
-        xlab("Minimum read length") +
+        xlab("Minimum read length (bases)") +
         ylab("Total yield in bases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
@@ -633,10 +648,10 @@ multi.plots = function(dm, output.dir){
     flog.info("Plotting length distributions")
     p1 = ggplot(dm, aes(x = sequence_length_template)) + 
         geom_line(stat="density", aes(colour = flowcell), size = 1) +
-        scale_x_log10(minor_breaks=log10_minor_break()) + 
+        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
-        xlab("Read length") +
+        xlab("Read length (bases)") +
         ylab("Density")
     suppressMessages(ggsave(filename = file.path(output.dir, "length_distributions.png"), width = p1m*960/75, height = p1m*960/75, plot = p1)) #
     
@@ -664,7 +679,7 @@ multi.plots = function(dm, output.dir){
     flog.info("Plotting flowcell yield by length")
     p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
         geom_line(size = 1) + 
-        xlab("Minimum read length") +
+        xlab("Minimum read length (bases)") +
         ylab("Total yield in bases") +
         theme(text = element_text(size = 15)) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
@@ -679,7 +694,7 @@ multi.plots = function(dm, output.dir){
         theme(text = element_text(size = 15)) +
         geom_smooth() + 
         xlab("Hours into run") + 
-        ylab("Mean read length") + 
+        ylab("Mean read length (bases)") + 
         ylim(0, NA) +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     suppressMessages(ggsave(filename = file.path(output.dir, "length_by_hour.png"), width = p1m*960/75, height = p1m*960/75, plot = p7))
