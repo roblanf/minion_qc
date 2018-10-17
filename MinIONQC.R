@@ -525,14 +525,28 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads"))
     suppressMessages(ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = p1m*960/75, height = p1m*480/75, plot = p9)) #
     
-    flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
-    p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
-        geom_point(alpha=0.05, size = 0.4) + 
-        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
-        labs(colour='Events per base\n(log scale)\n')  + 
-        theme(text = element_text(size = 15)) +
-        xlab("Read length (bases)") +
-        ylab("Mean Q score of read")
+    if(max(d$channel)<=512){
+        # minion
+        flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
+        p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+            geom_point(alpha=0.05, size = 0.4) + 
+            scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
+            labs(colour='Events per base\n(log scale)\n')  + 
+            theme(text = element_text(size = 15)) +
+            xlab("Read length (bases)") +
+            ylab("Mean Q score of read")
+    }else{
+        # promethion
+        p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+            geom_bin2d() + 
+            scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
+            theme(text = element_text(size = 15)) +
+            scale_fill_viridis() +
+            xlab("Read length (bases)") +
+            ylab("Mean Q score of read")
+    }
+    
+    
     if(max(d$events_per_base, na.rm=T)>0){
         # a catch for 1D2 runs which don't have events per base
         p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
