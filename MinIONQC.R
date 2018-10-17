@@ -450,21 +450,21 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     }
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
-    p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time, colour = Q_cutoff)) + 
+    p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = Q_cutoff)) + 
         geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_line(size = 1) + 
         xlab("Hours into run") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
     suppressMessages(ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = p1m*960/75, height = p1m*480/75, plot = p5)) #
 
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield by read length"))
-    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
+    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length (bases)") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
@@ -653,10 +653,10 @@ combined.flowcell <- function(d, output.dir, q=8){
     suppressMessages(ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p2))
         
     flog.info("Plotting combined yield by length")
-    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
+    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length (bases)") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
@@ -709,21 +709,21 @@ multi.plots = function(dm, output.dir){
 
 
     flog.info("Plotting flowcell yield over time")
-    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time, colour = flowcell)) + 
+    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = flowcell)) + 
         geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_line(size = 1) + 
         xlab("Hours into run") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
         theme(text = element_text(size = 15))
     suppressMessages(ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = p1m*960/75, height = p1m*960/75, plot = p5)) #
 
         
     flog.info("Plotting flowcell yield by length")
-    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
+    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = flowcell)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length (bases)") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         theme(text = element_text(size = 15)) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     xmax = max(dm$sequence_length_template[which(dm$cumulative.bases > 0.01 * max(dm$cumulative.bases))])
