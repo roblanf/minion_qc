@@ -573,6 +573,15 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         guides(fill=FALSE)
     suppressMessages(ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 960/75, height = 480/75, plot = p11)) 
     
+
+    flog.info(paste(sep = "", flowcell, ": plotting physical overview of output per channel"))
+    p12 = ggplot(subset(cc, variable == "Number of bases per channel"), aes(x = col, y = row)) + geom_raster(aes(fill = value/1000000000)) + 
+        facet_wrap(~Q_cutoff, ncol = 1) + 
+        theme(text = element_text(size = 15)) +
+        scale_fill_viridis(name = "GB/channel")
+    suppressMessages(ggsave(filename = file.path(output.dir, "gb_per_channel_overview.png"), width = 960/75, height = 480/75, plot = p12)) 
+    
+    
     return(d)
 }
 
@@ -799,3 +808,4 @@ if(file_test("-f", input.file)==TRUE & length(test.file)>1){
         input.file, 
         "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
 }
+
