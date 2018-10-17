@@ -432,8 +432,9 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, "q_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p2)) #
     
-    flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
     if(max(d$channel)<=512){
+        # only do this for minion, not promethion
+	    flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
         p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
             geom_point(size=1.5, alpha=0.35) + 
             scale_colour_viridis() + 
@@ -446,21 +447,6 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
             theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
     
             suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/75, height = 1920/75, plot = p3))
-    }else{
-        # assume PromethION
-        p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
-            geom_point(size=0.1, alpha=0.35) + 
-            scale_colour_viridis() + 
-            labs(colour='Q')  + 
-            scale_y_log10() + 
-            facet_grid(row~col) +
-            theme(panel.spacing = unit(0.05, "lines"), strip.background = element_blank(), strip.text.x = element_blank()) +
-            xlab("Hours into run") +
-            ylab("Read length") +
-            theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
-        
-        suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/12, height = 1920/75, plot = p3, limitsize = FALSE))
-        
     }
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
