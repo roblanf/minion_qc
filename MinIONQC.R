@@ -129,8 +129,16 @@ add_cols <- function(d, min.q){
         quit()
     }
     
-    d = merge(d, map, by="channel")
-
+    if(max(d$channel)<=512){
+        d = merge(d, map, by="channel")
+    }else{
+        # thanks to Matt Loose. Code adapted from: https://github.com/mattloose/flowcellvis/blob/master/flowcellgif.py
+        block = floor((d$channel-1)/250)
+        remainder = (d$channel-1)%%250
+        d$row = floor(remainder/10) + 1 # +1 because R is not zero indexed
+        d$col = remainder%%10 + block*10 + 1 # +1 because R is not zero indexed 
+    }
+    
     d = d[with(d, order(as.numeric(start_time))), ] # sort by start time
     d$cumulative.bases.time = cumsum(as.numeric(d$sequence_length_template))
 
@@ -160,6 +168,12 @@ load_summary <- function(filepath, min.q){
                                                 mean_qscore_2d = 'n',
                                                 start_time = 'n',
                                                 calibration_strand_genome_template = 'c'))
+    
+    if(max(d$channel)<=512){
+        flog.info("MinION flowcell detected")
+    }else{
+        flog.info("PromethION flowcell detected")
+    }
     
     # remove the control sequence from directRNA runs
     if("calibration_strand_genome_template" %in% names(d)){
@@ -201,10 +215,10 @@ load_summary <- function(filepath, min.q){
     # make sure this is a factor
     d$Q_cutoff = as.factor(d$Q_cutoff)
     
-    keep = c("hour","start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "cumulative.bases.time", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
-    d = d[keep]
+    keep = c("hour", "start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "cumulative.bases.time", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
+    dk = d[, which(names(d) %in% keep)]
         
-    return(d)
+    return(dk)
 }
 
 reads.gt <- function(d, len){
@@ -417,17 +431,35 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     suppressMessages(ggsave(filename = file.path(output.dir, "q_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p2)) #
     
     flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
-    p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
-        geom_point(size=1.5, alpha=0.35) + 
-        scale_colour_viridis() + 
-        labs(colour='Q')  + 
-        scale_y_log10() + 
-        facet_grid(row~col) +
-        theme(panel.spacing = unit(0.5, "lines")) +
-        xlab("Hours into run") +
-        ylab("Read length") +
-        theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
-    suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/75, height = 1920/75, plot = p3))
+    if(max(d$channel)<=512){
+        p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
+            geom_point(size=1.5, alpha=0.35) + 
+            scale_colour_viridis() + 
+            labs(colour='Q')  + 
+            scale_y_log10() + 
+            facet_grid(row~col) +
+            theme(panel.spacing = unit(0.5, "lines")) +
+            xlab("Hours into run") +
+            ylab("Read length") +
+            theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
+    
+            suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/75, height = 1920/75, plot = p3))
+    }else{
+        # assume PromethION
+        p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
+            geom_point(size=0.1, alpha=0.35) + 
+            scale_colour_viridis() + 
+            labs(colour='Q')  + 
+            scale_y_log10() + 
+            facet_grid(row~col) +
+            theme(panel.spacing = unit(0.05, "lines"), strip.background = element_blank(), strip.text.x = element_blank()) +
+            xlab("Hours into run") +
+            ylab("Read length") +
+            theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
+        
+        suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/12, height = 1920/75, plot = p3, limitsize = FALSE))
+        
+    }
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
     p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time, colour = Q_cutoff)) + 
