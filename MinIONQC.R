@@ -357,8 +357,10 @@ channel.summary <- function(d){
               total.bases = sum(sequence_length_template), 
               total.reads = sum(which(sequence_length_template>=0)), 
               mean.read.length = mean(sequence_length_template), 
-              median.read.length = median(sequence_length_template))
-    b = melt(a, id.vars = c("channel"))
+              median.read.length = median(sequence_length_template),
+              row = mean(row),
+              col = mean(col))
+    b = melt(a, id.vars = c("channel", "row", "col"))
     return(b)    
 }
 
