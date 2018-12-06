@@ -1,0 +1,57 @@
+input file: /Users/roblanfear/Documents/github/minion_qc/example_input_promethion/sequencing_summary.txt
+All reads:
+  total.gigabases: 0.6231965
+  total.reads: 75160
+  N50.length: 21717.0
+  mean.length: 8291.6
+  median.length: 3347.5
+  max.length: 351505.0
+  mean.q: 7.8
+  median.q: 8.7
+  reads:
+    '>10kb': 19341
+    '>20kb': 9920
+    '>50kb': 1107
+    '>100kb': 17
+    '>200kb': 1
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 41.0
+  gigabases:
+    '>10kb': 0.4706122
+    '>20kb': 0.3345952
+    '>50kb': 0.0683878
+    '>100kb': 0.002269
+    '>200kb': 0.0003515
+    '>500kb': 0.0
+    '>1m': 0.0
+    ultralong: 0.0044904
+Q>=7:
+  total.gigabases: 0.4943604
+  total.reads: 49666
+  N50.length: 23070.0
+  mean.length: 9953.7
+  median.length: 3853.0
+  max.length: 143358.0
+  mean.q: 9.6
+  median.q: 9.8
+  reads:
+    '>10kb': 15202
+    '>20kb': 8142
+    '>50kb': 1003
+    '>100kb': 13
+    '>200kb': 0
+    '>500kb': 0
+    '>1m': 0
+    ultralong: 29.0
+  gigabases:
+    '>10kb': 0.3814253
+    '>20kb': 0.2793292
+    '>50kb': 0.0618396
+    '>100kb': 0.0015112
+    '>200kb': 0.0
+    '>500kb': 0.0
+    '>1m': 0.0
+    ultralong: 0.0030172
+notes: ultralong reads refers to the largest set of reads with N50>100KB
+
