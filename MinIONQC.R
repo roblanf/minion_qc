@@ -575,12 +575,37 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     
 
     flog.info(paste(sep = "", flowcell, ": plotting physical overview of output per channel"))
-    p12 = ggplot(subset(cc, variable == "Number of bases per channel"), aes(x = col, y = row)) + geom_raster(aes(fill = value/1000000000)) + 
-        facet_wrap(~Q_cutoff, ncol = 1) + 
-        theme(text = element_text(size = 15)) +
-        scale_fill_viridis(name = "GB/channel")
-    suppressMessages(ggsave(filename = file.path(output.dir, "gb_per_channel_overview.png"), width = 960/75, height = 480/75, plot = p12)) 
-    
+    if(max(d$channel)<=512){
+        # minion
+        cols = 2
+    }else{
+        # promethion
+        cols = 1
+    }
+
+
+    p12 = ggplot(subset(cc, variable == "Number of bases per channel"), aes(x = as.numeric(col), y = as.numeric(row))) + 
+        geom_tile(aes(fill = value/1000000000), colour="white", size=0.25) +
+        facet_wrap(~Q_cutoff, ncol = cols) + 
+        theme(text = element_text(size = 15), 
+                plot.background=element_blank(), 
+                panel.border=element_blank(),
+                panel.background = element_blank(),
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank()) +
+        scale_fill_viridis(name = "GB/channel") +
+        scale_y_continuous(trans = "reverse", expand=c(0,0)) +
+        scale_x_continuous(expand=c(0,0)) +
+        coord_fixed() +
+        labs(x="channel column",y="channel row")
+
+    if(max(d$channel)<=512){
+        # minion
+        suppressMessages(ggsave(filename = file.path(output.dir, "gb_per_channel_overview.png"), width = 960/150, height = 480/75, plot = p12)) 
+    }else{
+        # promethion
+        suppressMessages(ggsave(filename = file.path(output.dir, "gb_per_channel_overview.png"), width = 960/75, height = 480/75, plot = p12))         
+    }
     
     return(d)
 }
