@@ -4,10 +4,10 @@ All reads:
   total.reads: 4001
   N50.length: 6732.0
   mean.length: 1588.1
-  median.length: 0.0e+00
+  median.length: 0.0
   max.length: 21568.0
   mean.q: 5.2
-  median.q: 0.0e+00
+  median.q: 0.0
   reads:
     '>10kb': 92
     '>20kb': 1
@@ -16,16 +16,16 @@ All reads:
     '>200kb': 0
     '>500kb': 0
     '>1m': 0
-    ultralong: 0.0e+00
+    ultralong: 0.0
   gigabases:
     '>10kb': 0.0010863
     '>20kb': 2.1568e-05
-    '>50kb': 0.0e+00
-    '>100kb': 0.0e+00
-    '>200kb': 0.0e+00
-    '>500kb': 0.0e+00
-    '>1m': 0.0e+00
-    ultralong: 0.0e+00
+    '>50kb': 0.0
+    '>100kb': 0.0
+    '>200kb': 0.0
+    '>500kb': 0.0
+    '>1m': 0.0
+    ultralong: 0.0
 Q>=7:
   total.gigabases: 0.0061032
   total.reads: 1556
@@ -43,15 +43,15 @@ Q>=7:
     '>200kb': 0
     '>500kb': 0
     '>1m': 0
-    ultralong: 0.0e+00
+    ultralong: 0.0
   gigabases:
     '>10kb': 0.0010212
     '>20kb': 2.1568e-05
-    '>50kb': 0.0e+00
-    '>100kb': 0.0e+00
-    '>200kb': 0.0e+00
-    '>500kb': 0.0e+00
-    '>1m': 0.0e+00
-    ultralong: 0.0e+00
+    '>50kb': 0.0
+    '>100kb': 0.0
+    '>200kb': 0.0
+    '>500kb': 0.0
+    '>1m': 0.0
+    ultralong: 0.0
 notes: ultralong reads refers to the largest set of reads with N50>100KB
 

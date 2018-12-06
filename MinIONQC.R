@@ -129,8 +129,16 @@ add_cols <- function(d, min.q){
         quit()
     }
     
-    d = merge(d, map, by="channel")
-
+    if(max(d$channel)<=512){
+        d = merge(d, map, by="channel")
+    }else{
+        # thanks to Matt Loose. Code adapted from: https://github.com/mattloose/flowcellvis/blob/master/flowcellgif.py
+        block = floor((d$channel-1)/250)
+        remainder = (d$channel-1)%%250
+        d$row = floor(remainder/10) + 1 # +1 because R is not zero indexed
+        d$col = remainder%%10 + block*10 + 1 # +1 because R is not zero indexed 
+    }
+    
     d = d[with(d, order(as.numeric(start_time))), ] # sort by start time
     d$cumulative.bases.time = cumsum(as.numeric(d$sequence_length_template))
 
@@ -160,6 +168,12 @@ load_summary <- function(filepath, min.q){
                                                 mean_qscore_2d = 'n',
                                                 start_time = 'n',
                                                 calibration_strand_genome_template = 'c'))
+    
+    if(max(d$channel)<=512){
+        flog.info("MinION flowcell detected")
+    }else{
+        flog.info("PromethION flowcell detected")
+    }
     
     # remove the control sequence from directRNA runs
     if("calibration_strand_genome_template" %in% names(d)){
@@ -201,10 +215,10 @@ load_summary <- function(filepath, min.q){
     # make sure this is a factor
     d$Q_cutoff = as.factor(d$Q_cutoff)
     
-    keep = c("hour","start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "cumulative.bases.time", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
-    d = d[keep]
+    keep = c("hour", "start_time", "channel", "sequence_length_template", "mean_qscore_template", "row", "col", "cumulative.bases", "cumulative.bases.time", "reads_per_hour", "Q_cutoff", "flowcell", "events_per_base")
+    dk = d[, which(names(d) %in% keep)]
         
-    return(d)
+    return(dk)
 }
 
 reads.gt <- function(d, len){
@@ -343,8 +357,10 @@ channel.summary <- function(d){
               total.bases = sum(sequence_length_template), 
               total.reads = sum(which(sequence_length_template>=0)), 
               mean.read.length = mean(sequence_length_template), 
-              median.read.length = median(sequence_length_template))
-    b = melt(a, id.vars = c("channel"))
+              median.read.length = median(sequence_length_template),
+              row = mean(row),
+              col = mean(col))
+    b = melt(a, id.vars = c("channel", "row", "col"))
     return(b)    
 }
 
@@ -416,35 +432,39 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, "q_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p2)) #
     
-    flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
-    p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
-        geom_point(size=1.5, alpha=0.35) + 
-        scale_colour_viridis() + 
-        labs(colour='Q')  + 
-        scale_y_log10() + 
-        facet_grid(row~col) +
-        theme(panel.spacing = unit(0.5, "lines")) +
-        xlab("Hours into run") +
-        ylab("Read length") +
-        theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
-    suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/75, height = 1920/75, plot = p3))
+    if(max(d$channel)<=512){
+        # only do this for minion, not promethion
+	    flog.info(paste(sep = "", flowcell, ": plotting flowcell overview"))
+        p3 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x=start_time/3600, y=sequence_length_template, colour = mean_qscore_template)) + 
+            geom_point(size=1.5, alpha=0.35) + 
+            scale_colour_viridis() + 
+            labs(colour='Q')  + 
+            scale_y_log10() + 
+            facet_grid(row~col) +
+            theme(panel.spacing = unit(0.5, "lines")) +
+            xlab("Hours into run") +
+            ylab("Read length") +
+            theme(text = element_text(size = 40), axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), legend.text=element_text(size=18), legend.title=element_text(size=24))
+    
+            suppressMessages(ggsave(filename = file.path(output.dir, "flowcell_overview.png"), width = 2000/75, height = 1920/75, plot = p3))
+    }
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
-    p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time, colour = Q_cutoff)) + 
+    p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = Q_cutoff)) + 
         geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_line(size = 1) + 
         xlab("Hours into run") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
     suppressMessages(ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = p1m*960/75, height = p1m*480/75, plot = p5)) #
 
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield by read length"))
-    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
+    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length (bases)") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
@@ -505,14 +525,28 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads"))
     suppressMessages(ggsave(filename = file.path(output.dir, "reads_per_hour.png"), width = p1m*960/75, height = p1m*480/75, plot = p9)) #
     
-    flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
-    p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
-        geom_point(alpha=0.05, size = 0.4) + 
-        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
-        labs(colour='Events per base\n(log scale)\n')  + 
-        theme(text = element_text(size = 15)) +
-        xlab("Read length (bases)") +
-        ylab("Mean Q score of read")
+    if(max(d$channel)<=512){
+        # minion
+        flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
+        p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+            geom_point(alpha=0.05, size = 0.4) + 
+            scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
+            labs(colour='Events per base\n(log scale)\n')  + 
+            theme(text = element_text(size = 15)) +
+            xlab("Read length (bases)") +
+            ylab("Mean Q score of read")
+    }else{
+        # promethion
+        p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
+            geom_bin2d() + 
+            scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
+            theme(text = element_text(size = 15)) +
+            scale_fill_viridis() +
+            xlab("Read length (bases)") +
+            ylab("Mean Q score of read")
+    }
+    
+    
     if(max(d$events_per_base, na.rm=T)>0){
         # a catch for 1D2 runs which don't have events per base
         p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
@@ -538,6 +572,40 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75) +
         guides(fill=FALSE)
     suppressMessages(ggsave(filename = file.path(output.dir, "channel_summary.png"), width = 960/75, height = 480/75, plot = p11)) 
+    
+
+    flog.info(paste(sep = "", flowcell, ": plotting physical overview of output per channel"))
+    if(max(d$channel)<=512){
+        # minion
+        cols = 2
+    }else{
+        # promethion
+        cols = 1
+    }
+
+
+    p12 = ggplot(subset(cc, variable == "Number of bases per channel"), aes(x = as.numeric(col), y = as.numeric(row))) + 
+        geom_tile(aes(fill = value/1000000000), colour="white", size=0.25) +
+        facet_wrap(~Q_cutoff, ncol = cols) + 
+        theme(text = element_text(size = 15), 
+                plot.background=element_blank(), 
+                panel.border=element_blank(),
+                panel.background = element_blank(),
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank()) +
+        scale_fill_viridis(name = "GB/channel") +
+        scale_y_continuous(trans = "reverse", expand=c(0,0)) +
+        scale_x_continuous(expand=c(0,0)) +
+        coord_fixed() +
+        labs(x="channel column",y="channel row")
+
+    if(max(d$channel)<=512){
+        # minion
+        suppressMessages(ggsave(filename = file.path(output.dir, "gb_per_channel_overview.png"), width = 960/150, height = 480/75, plot = p12)) 
+    }else{
+        # promethion
+        suppressMessages(ggsave(filename = file.path(output.dir, "gb_per_channel_overview.png"), width = 960/75, height = 480/75, plot = p12))         
+    }
     
     return(d)
 }
@@ -610,10 +678,10 @@ combined.flowcell <- function(d, output.dir, q=8){
     suppressMessages(ggsave(filename = file.path(output.dir, "combined_q_histogram.png"), width = p1m*960/75, height = p1m*960/75, plot = p2))
         
     flog.info("Plotting combined yield by length")
-    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases, colour = Q_cutoff)) + 
+    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length (bases)") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
         theme(text = element_text(size = 15))
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
@@ -666,21 +734,21 @@ multi.plots = function(dm, output.dir){
 
 
     flog.info("Plotting flowcell yield over time")
-    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time, colour = flowcell)) + 
+    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = flowcell)) + 
         geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
         geom_line(size = 1) + 
         xlab("Hours into run") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
         theme(text = element_text(size = 15))
     suppressMessages(ggsave(filename = file.path(output.dir, "yield_over_time.png"), width = p1m*960/75, height = p1m*960/75, plot = p5)) #
 
         
     flog.info("Plotting flowcell yield by length")
-    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases, colour = flowcell)) + 
+    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = flowcell)) + 
         geom_line(size = 1) + 
         xlab("Minimum read length (bases)") +
-        ylab("Total yield in bases") +
+        ylab("Total yield in gigabases") +
         theme(text = element_text(size = 15)) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y")
     xmax = max(dm$sequence_length_template[which(dm$cumulative.bases > 0.01 * max(dm$cumulative.bases))])
@@ -765,3 +833,4 @@ if(file_test("-f", input.file)==TRUE & length(test.file)>1){
         input.file, 
         "\nThe input must be either a sequencing_summary.txt file, or a directory containing one or more such files"))
 }
+
