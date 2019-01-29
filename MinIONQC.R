@@ -67,6 +67,13 @@ parser <- add_option(parser,
                      help="TRUE or FALSE (the default). When true, MinIONQC will output smaller figures, e.g. suitable for publications or presentations. The default is to produce larger figures optimised for display on screen. Some figures just require small text, and cannot be effectively resized."
                      )
 
+parser <- add_option(parser, 
+                     opt_str = c("-c", "--combined-only"), 
+                     type = "logical",
+                     default = FALSE,
+                     dest = 'combined_only',
+                     help="TRUE or FALSE (the default). When true, MinIONQC will only produce the combined report."
+                     )
 
 opt = parse_args(parser)
 
@@ -86,6 +93,7 @@ if (length(opt$input.file)==1) {
 q = opt$q
 cores = opt$cores
 smallfig = opt$smallfig
+combined_only = opt$combined_only
 
 p1m = 1.0 
 
@@ -803,7 +811,11 @@ if(file_test("-f", input.file)==TRUE & length(test.file)>1){
         flog.info('**** Analysis complete ****')
     }else{
         # analyse each one and keep the returns in a list
-        results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
+        if(combined_only == FALSE){
+            results = mclapply(summaries, multi.flowcell, output.dir, q, mc.cores = cores)
+        }else{
+            results = mclapply(summaries, load_summary, min.q = c(-Inf, q), mc.cores = cores)
+        }
         
         # rbind that list
         flog.info('**** Analysing data from all flowcells combined ****')
