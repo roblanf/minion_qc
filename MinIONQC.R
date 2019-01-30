@@ -72,7 +72,7 @@ parser <- add_option(parser,
                      type = "logical",
                      default = FALSE,
                      dest = 'combined_only',
-                     help="TRUE or FALSE (the default). When true, MinIONQC will only produce the combined report."
+                     help="TRUE or FALSE (the default). When true, MinIONQC will only produce the combined report, it will not produce individual reports for each flowcell."
                      )
 
 opt = parse_args(parser)

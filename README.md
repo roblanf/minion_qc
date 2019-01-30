@@ -73,6 +73,9 @@ Options:
 
   -s SMALLFIGURES, --smallfigures=SMALLFIGURES
     TRUE or FALSE (the default). When true, MinIONQC will output smaller figures, e.g. suitable for publications or presentations. The default is to produce larger figures optimised for display on screen. Some figures just require small text, and cannot be effectively resized.
+
+  -c COMBINED-ONLY, --combined-only=COMBINED-ONLY
+		TRUE or FALSE (the default). When true, MinIONQC will only produce the combined report, it will not produce individual reports for each flowcell.
 ```
 
 ## Installation
