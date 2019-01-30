@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# MinIONQC version 1.3.5
+# MinIONQC version 1.4.1
 # Copyright (C) 2017 onwards Robert Lanfear
 #
 # For license see https://github.com/roblanf/minion_qc/blob/master/LICENSE
