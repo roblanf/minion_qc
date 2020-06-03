@@ -75,7 +75,12 @@ Options:
     TRUE or FALSE (the default). When true, MinIONQC will output smaller figures, e.g. suitable for publications or presentations. The default is to produce larger figures optimised for display on screen. Some figures just require small text, and cannot be effectively resized.
 
   -c COMBINED-ONLY, --combined-only=COMBINED-ONLY
-		TRUE or FALSE (the default). When true, MinIONQC will only produce the combined report, it will not produce individual reports for each flowcell.
+    TRUE or FALSE (the default). When true, MinIONQC will only produce the combined report, it will not produce individual reports for each flowcell.
+
+  -f FORMAT, --format=FORMAT
+    A string in quotes, to set the output format of the plots. 'png' (the default) or any of 'pdf', 'ps', 'jpeg', 'tiff', 'bmp' are supported. 'png' is recommended and is thoroughly tested. The 'pdf' option may be useful if you have a system without X11 installed, because PNG files require X11 but PDF files do not. Other options are there for convenience.
+
+
 ```
 
 ## Installation

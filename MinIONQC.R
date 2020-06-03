@@ -76,11 +76,11 @@ parser <- add_option(parser,
                      )
 
 parser <- add_option(parser, 
-                     opt_str = c("-f", "--format-of-plots"), 
+                     opt_str = c("-f", "--format"), 
                      type = "character",
                      default = 'png',
                      dest = 'plot_format',
-                     help="Output plots as 'png' (the default) or any of 'png', 'pdf', 'ps', 'jpeg', 'tiff', 'bmp'. 'png' is recommended and is thoroughly tested. The 'pdf' option may be useful if you have a system without X11 installed, because PNG files require X11 but PDF files do not. Other options are there for convenience."
+                     help="A string in quotes, to set the output format of the plots. 'png' (the default) or any of 'pdf', 'ps', 'jpeg', 'tiff', 'bmp' are supported. 'png' is recommended and is thoroughly tested. The 'pdf' option may be useful if you have a system without X11 installed, because PNG files require X11 but PDF files do not. Other options are there for convenience."
 )
 
 
