@@ -168,7 +168,9 @@ load_summary <- function(filepath, min.q){
     # min.q is a vector of length 2 defining 2 levels of min.q to have
     # by default the lowest value is -Inf, i.e. includes all reads. The 
     # other value in min.q is set by the user at the command line
-    d = read_tsv(filepath, col_types = cols_only(channel = 'i', 
+    
+    suppressWarnings({
+        d = read_tsv(filepath, col_types = cols_only(channel = 'i', 
                                                 num_events_template = 'i', 
                                                 sequence_length_template = 'i', 
                                                 mean_qscore_template = 'n',
@@ -176,6 +178,18 @@ load_summary <- function(filepath, min.q){
                                                 mean_qscore_2d = 'n',
                                                 start_time = 'n',
                                                 calibration_strand_genome_template = 'c'))
+    })
+    
+    problem_rows = problems(d)$row
+    
+    if(length(problem_rows>0)){
+
+        flog.warn("There were problems in parsing your input file with the following rows: ")
+        flog.warn(problem_rows)
+        flog.warn("These rows will be ignored for further analysis, please check your input file")
+        d = d[-c(problem_rows),]
+        
+    }
     
     if(max(d$channel)<=512){
         flog.info("MinION flowcell detected")
