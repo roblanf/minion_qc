@@ -27,13 +27,17 @@ If you don't already have `sequencing_summary.txt` files for your data, you can 
 
 ## Quick start
 
-The input for the script is one or more `sequencing_summary.txt` files produced by ONT's Albacore or Guppy basecalles, based on data from one or more MinION or PromethION flowcells. MinIONQC autodetects which kind of flowcell your data came from.
+The input for the script is one or more `sequencing_summary.txt` files produced by ONT's Albacore or Guppy basecallers, based on data from one or more MinION or PromethION flowcells. MinIONQC autodetects which kind of flowcell your data came from.
+
+#### One `sequencing_summary.txt` file
 
 To run it on one `sequencing_summary.txt` file, just point it to a single `sequencing_summary.txt` file like this:
 
 ```
 Rscript MinIONQC.R -i path/to/sequencing_summary.txt
 ```
+
+#### Multiple `sequencing_summary.txt` files in different directories
 
 To run it on a directory with multiple `sequencing_summary.txt` files, make sure that each file is called  `sequencing_summary.txt`, and is contained in a separate directory with a unique name (this will be used as the name of the flowcell), then:
 
@@ -48,7 +52,31 @@ The script will simply look for all `sequencing_summary.txt` files recursively i
 
 You'll see a series of plots in the output directory, and a YAML file that describes your output (you can open this in any text editor). These, and other command line options, are described below.
 
+
+#### Multiple `sequencing_summary.txt` files in the same directory
+
+PromethION users will often have a collection of `sequencing_summary.txt` files from a single run, named something like:
+
+```
+sequencing_summary_FAM92215_1a854df33.txt
+sequencing_summary_FAM92215_2a473djj2.txt
+sequencing_summary_FAM94555_r11jee78q.txt
+```
+
+Typically these are all from the same run, it's just that the PromethION outputs the basecalls into a series of files as it goes. 
+
+To use MinIONQC with these files, simply `cat` together the files you want to join first into a single file, then run MinIONQC. For example, if you wanted to join all of these files together for an analysis, you would simply do the following:
+
+```
+cat sequencing_summary_* > sequencing_summary.txt
+Rscript MinIONQC.R -i sequencing_summary.txt
+```
+
+The first line just joins all the partial files together. The order you join them does not matter. 
+
 Note: for direct RNA runs, any reads from the control RNA sequence (i.e. anything in your summary file labelled "YHR174W") are removed prior to analysis.
+
+
 
 ## Commandline options
 
