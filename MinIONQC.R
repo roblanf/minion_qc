@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+ #!/usr/bin/env Rscript
 
 # MinIONQC version 1.4.1
 # Copyright (C) 2017 onwards Robert Lanfear
@@ -442,12 +442,18 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     write(as.yaml(summary), out.txt)
     
     muxes = seq(from = 0, to = max(d$hour), by = 8)
+	N50 = data.frame(Q_cutoff = c("All reads", q_title), n50 = c(all.reads.summary$N50.length, q10.reads.summary$N50.length))
+	data_text = data.frame(
+			# label = c(paste("N50", N50["All reads", "n50"]), paste("N50", N50[q_title, "n50"])),
+			label = c("N50 1","N50 2"),
+			x = c(N50["All reads", "n50"]-N50["All reads", "n50"]*0.1 , N50[q_title, "n50"]-N50[q_title, "n50"]*0.1), 
+			Q_cutoff = c("All reads", q_title)
+	)
 
     # set up variable sizes
     if(smallfig == TRUE){ p1m = 0.5 }else{ p1m = 1.0 }
     if(smallfig == TRUE){ p2m = 0.6 }else{ p2m = 1.0 }
-
-    
+	
     # make plots
     flog.info(paste(sep = "", flowcell, ": plotting length histogram"))
     p1 = ggplot(d, aes(x = sequence_length_template, fill = Q_cutoff)) + 
@@ -457,6 +463,10 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         theme(text = element_text(size = 15)) +
         xlab("Read length (bases)") +
         ylab("Number of reads") +
+		geom_vline(data=N50, aes(xintercept = n50), color="red") +	# ajouter label
+		geom_text(data = data_text, mapping = aes(x=x, y=300, label = label)) +
+		#geom_vline(xintercept = q10.reads.summary$mean.length, color="yellow") +
+		geom_vline(data=d, aes(xintercept = mean(sequence_length_template)), color="yellow") + # ajouter label 
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, paste("length_histogram.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*960/75, plot = p1)) #
 
