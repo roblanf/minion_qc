@@ -111,6 +111,7 @@ q = opt$q
 cores = opt$cores
 smallfig = opt$smallfig
 combined_only = opt$combined_only
+mux_int = opt$muxscan
 
 if (opt$plot_format %in% c('png', 'pdf', 'ps', 'jpeg', 'tiff', 'bmp')){
     plot_format = opt$plot_format
