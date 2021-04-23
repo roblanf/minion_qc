@@ -442,13 +442,6 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     write(as.yaml(summary), out.txt)
     
     muxes = seq(from = 0, to = max(d$hour), by = 8)
-	N50 = data.frame(Q_cutoff = c("All reads", q_title), n50 = c(all.reads.summary$N50.length, q10.reads.summary$N50.length))
-	data_text = data.frame(
-			# label = c(paste("N50", N50["All reads", "n50"]), paste("N50", N50[q_title, "n50"])),
-			label = c("N50 1","N50 2"),
-			x = c(N50["All reads", "n50"]-N50["All reads", "n50"]*0.1 , N50[q_title, "n50"]-N50[q_title, "n50"]*0.1), 
-			Q_cutoff = c("All reads", q_title)
-	)
 
     # set up variable sizes
     if(smallfig == TRUE){ p1m = 0.5 }else{ p1m = 1.0 }
@@ -456,27 +449,63 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
 	
     # make plots
     flog.info(paste(sep = "", flowcell, ": plotting length histogram"))
-    p1 = ggplot(d, aes(x = sequence_length_template, fill = Q_cutoff)) + 
-        geom_histogram(bins = 300) + 
-        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
-        theme(text = element_text(size = 15)) +
-        xlab("Read length (bases)") +
-        ylab("Number of reads") +
-		geom_vline(data=N50, aes(xintercept = n50), color="red") +	# ajouter label
-		geom_text(data = data_text, mapping = aes(x=x, y=300, label = label)) +
-		#geom_vline(xintercept = q10.reads.summary$mean.length, color="yellow") +
-		geom_vline(data=d, aes(xintercept = mean(sequence_length_template)), color="yellow") + # ajouter label 
-        guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
+	
+	# Extract values for N50 and mean display on p1
+	annotation_df = data.frame(
+			Q_cutoff = c("All reads", q_title),
+			n50 = c(all.reads.summary$N50.length, q10.reads.summary$N50.length),
+			mean = c(all.reads.summary$mean.length, q10.reads.summary$mean.length),
+			n50_math = c(
+					if(all.reads.summary$N50.length > all.reads.summary$mean.length){"+"} else {"-"},
+					if(all.reads.summary$N50.length > q10.reads.summary$mean.length){"+"} else {"-"}
+			),
+			mean_math = c(
+					if(all.reads.summary$N50.length > all.reads.summary$mean.length){"-"} else {"+"},
+					if(all.reads.summary$N50.length > q10.reads.summary$mean.length){"-"} else {"+"}
+			)
+	)
+	
+	# Set up labels and their location on p1
+	annotation_text_df = data.frame(
+			Q_cutoff = c("All reads", q_title),
+			n50_label = c(paste("N50", annotation_df[1,2], sep="\n"), paste("N50", annotation_df[2,2], sep="\n")),
+			n50_x = c(eval(parse(text=paste(annotation_df[1,"n50"], annotation_df[1,"n50_math"] , annotation_df[1,"n50"], "*", 0.4))), eval(parse(text=paste(annotation_df[2,"n50"],annotation_df[2, "n50_math"] ,annotation_df[2,"n50"], "*", 0.4)))),
+			mean_label = c(paste("Mean", annotation_df[1,3], sep="\n"), paste("Mean", annotation_df[2,3], sep="\n")),
+			mean_x =  c(eval(parse(text=paste(annotation_df[1,"mean"], annotation_df[1, "mean_math"] , annotation_df[1,"mean"], "*", 0.4))), eval(parse(text=paste(annotation_df[2,"mean"],annotation_df[2, "mean_math"] ,annotation_df[2,"mean"], "*", 0.4))))
+	)
+	
+	p1 = ggplot(d, aes(x = sequence_length_template, fill = Q_cutoff)) + 
+			geom_histogram(bins = 300) + 
+			scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
+			facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+			theme(text = element_text(size = 15)) +
+			xlab("Read length (bases)") +
+			ylab("Number of reads") +
+			guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
+	# Add a parameter to display or not ?
+	ylim=max(ggplot_build(p1)$data[[1]]$count)
+	p1 = p1 +
+			geom_vline(data=annotation_df, aes(xintercept = n50), color="black") +
+			geom_vline(data=annotation_df, aes(xintercept = mean), color="black") +
+			geom_text(data = annotation_text_df, mapping = aes(x=n50_x, y=ylim*0.85, label = n50_label)) +
+			geom_text(data = annotation_text_df, mapping = aes(x=mean_x, y=ylim*0.85, label = mean_label))
     suppressMessages(ggsave(filename = file.path(output.dir, paste("length_histogram.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*960/75, plot = p1)) #
 
     flog.info(paste(sep = "", flowcell, ": plotting mean Q score histogram"))
+	
+	# Extract values for meanQ display on p2
+	meanQ_df = data.frame(
+			Q_cutoff = c("All reads", q_title)
+	)
+
     p2 = ggplot(d, aes(x = mean_qscore_template, fill = Q_cutoff)) + 
         geom_histogram(bins = 300) + 
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
         xlab("Mean Q score of read") +
         ylab("Number of reads") +
+		#geom_vline(data=d, aes(xintercept = mean_qscore_template), color="black") +
+		#geom_text(data = annotation_text_df, mapping = aes(x=n50_x, y=ylim*0.85, label = n50_label)) +
         guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, paste("q_histogram.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*960/75, plot = p2)) #
     
