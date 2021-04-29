@@ -81,6 +81,14 @@ parser <- add_option(parser,
                      default = 'png',
                      dest = 'plot_format',
                      help="A string in quotes, to set the output format of the plots. 'png' (the default) or any of 'pdf', 'ps', 'jpeg', 'tiff', 'bmp' are supported. 'png' is recommended and is thoroughly tested. The 'pdf' option may be useful if you have a system without X11 installed, because PNG files require X11 but PDF files do not. Other options are there for convenience."
+					 )
+
+parser <- add_option(parser, 
+					opt_str = c("-m", "--muxes"), 
+					type = "numeric",
+					default = '0',
+					dest = 'muxscan',
+					help="The value for mux scan used in MinKnow."
 )
 
 
@@ -103,6 +111,7 @@ q = opt$q
 cores = opt$cores
 smallfig = opt$smallfig
 combined_only = opt$combined_only
+mux_int = opt$muxscan
 
 if (opt$plot_format %in% c('png', 'pdf', 'ps', 'jpeg', 'tiff', 'bmp')){
     plot_format = opt$plot_format
@@ -441,7 +450,10 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     
     write(as.yaml(summary), out.txt)
     
-    muxes = seq(from = 0, to = max(d$hour), by = 8)
+    if (mux_int == 0) {
+    	mux_int = max(d$hour)
+    }
+    muxes = seq(from = 0, to = max(d$hour), by = mux_int)
 
     # set up variable sizes
     if(smallfig == TRUE){ p1m = 0.5 }else{ p1m = 1.0 }
