@@ -29,21 +29,27 @@ If you don't already have `sequencing_summary.txt` files for your data, you can 
 
 The input for the script is one or more `sequencing_summary.txt` files produced by ONT's Albacore or Guppy basecallers, based on data from one or more MinION or PromethION flowcells. MinIONQC autodetects which kind of flowcell your data came from.
 
+> Please Note! MinIONQC is written in R, but you run it from the commandline (e.g. the terminal app on a Mac, or the command prompt on Windows).
+
 #### One `sequencing_summary.txt` file
 
-To run it on one `sequencing_summary.txt` file, just point it to a single `sequencing_summary.txt` file like this:
+To run it on one `sequencing_summary.txt` file, just use the commandline point it to a single `sequencing_summary.txt` file like this:
 
-```
+```{bash}
 Rscript MinIONQC.R -i path/to/sequencing_summary.txt
 ```
+
+> Remember - the command above should be run at the commandline, not from within R. 
 
 #### Multiple `sequencing_summary.txt` files in different directories
 
 To run it on a directory with multiple `sequencing_summary.txt` files, make sure that each file is called  `sequencing_summary.txt`, and is contained in a separate directory with a unique name (this will be used as the name of the flowcell), then:
 
-```shell
+```{bash}
 Rscript MinIONQC.R -i path/to/parent_directory
 ```
+
+> Remember - the command above should be run at the commandline, not from within R. 
 
 The script will simply look for all `sequencing_summary.txt` files recursively in the parent directory, and incorporate all of them. 
 
@@ -71,6 +77,8 @@ To use MinIONQC with these files, simply `cat` together the files you want to jo
 cat sequencing_summary_* > sequencing_summary.txt
 Rscript MinIONQC.R -i sequencing_summary.txt
 ```
+
+> Remember - the commands above should be run at the commandline, not from within R. 
 
 The first line just joins all the partial files together. The order you join them does not matter. 
 
@@ -156,12 +164,16 @@ If you want to run the example input, one option is to change directories to the
 Rscript MinIONQC.R -i example_input_minion -o my_example_output_minion -p 2 
 ```
 
+> Remember - the command above should be run at the commandline, not from within R. 
+
 ## Output details for MinION
 The following output was created by running the script on the example input files, which contains data from two flowcells from our lab.
 
 ```
 Rscript MinIONQC.R -i example_input_minion -o example_output_minion -s TRUE -p 2
 ```
+
+> Remember - the commands above should be run at the commandline, not from within R. 
 
 This runs the analysis with two processors, and produces smaller plots suitable for presentations or papers (where possible). The defualt (i.e. removing the `-s` option above) is to produce larger plots designed for viewing on full size monitors.
 
