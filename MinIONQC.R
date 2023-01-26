@@ -204,7 +204,8 @@ load_summary <- function(filepath, min.q){
     
     suppressWarnings({
         d = read_tsv(filepath, col_types = cols_only(channel = 'i', 
-                                                num_events_template = 'i', 
+                                                minknow_events = 'i',
+                                                num_events_template = 'i',
                                                 sequence_length_template = 'i', 
                                                 mean_qscore_template = 'n',
                                                 sequence_length_2d = 'i',
@@ -239,17 +240,22 @@ load_summary <- function(filepath, min.q){
         # it's a 1D2 or 2D run
         d$sequence_length_template = as.numeric(as.character(d$sequence_length_2d))
         d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_2d))
-        d$num_events_template = NA
+        d$minknow_events = NA
         d$start_time = as.numeric(as.character(d$start_time))
         
     }else{
         d$sequence_length_template = as.numeric(as.character(d$sequence_length_template))
         d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_template))
-        d$num_events_template = as.numeric(as.character(d$num_events_template))
+        if ( "minknow_events" %in% names(d) ) {
+            # Guppy v6.3.1 or newer
+            d$events_per_base = d$minknow_events/d$sequence_length_template
+        } else {
+            # older than Guppy v6.3.1
+            d$events_per_base = d$num_events_template/d$sequence_length_template
+        }
         d$start_time = as.numeric(as.character(d$start_time))
     }
         
-    d$events_per_base = d$num_events_template/d$sequence_length_template
 
     flowcell = basename(dirname(filepath))
     
