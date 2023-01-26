@@ -20,6 +20,7 @@ suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(futile.logger))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(optparse))
+suppressPackageStartupMessages(library(dplyr))
 
 
 
@@ -204,7 +205,8 @@ load_summary <- function(filepath, min.q){
     
     suppressWarnings({
         d = read_tsv(filepath, col_types = cols_only(channel = 'i', 
-                                                num_events_template = 'i', 
+                                                minknow_events = 'i',
+                                                num_events_template = 'i',
                                                 sequence_length_template = 'i', 
                                                 mean_qscore_template = 'n',
                                                 sequence_length_2d = 'i',
@@ -239,17 +241,22 @@ load_summary <- function(filepath, min.q){
         # it's a 1D2 or 2D run
         d$sequence_length_template = as.numeric(as.character(d$sequence_length_2d))
         d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_2d))
-        d$num_events_template = NA
+        d$minknow_events = NA
         d$start_time = as.numeric(as.character(d$start_time))
         
     }else{
         d$sequence_length_template = as.numeric(as.character(d$sequence_length_template))
         d$mean_qscore_template = as.numeric(as.character(d$mean_qscore_template))
-        d$num_events_template = as.numeric(as.character(d$num_events_template))
+        if ( "minknow_events" %in% names(d) ) {
+            # Guppy v6.3.1 or newer
+            d$events_per_base = d$minknow_events/d$sequence_length_template
+        } else {
+            # older than Guppy v6.3.1
+            d$events_per_base = d$num_events_template/d$sequence_length_template
+        }
         d$start_time = as.numeric(as.character(d$start_time))
     }
         
-    d$events_per_base = d$num_events_template/d$sequence_length_template
 
     flowcell = basename(dirname(filepath))
     
@@ -637,32 +644,29 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads"))
     suppressMessages(ggsave(filename = file.path(output.dir, paste("reads_per_hour.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*480/75, plot = p9)) #
     
-    if(max(d$channel)<=512){
-        # minion
-        flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
-        p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
-            geom_point(alpha=0.05, size = 0.4) + 
-            scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
-            labs(colour='Events per base\n(log scale)\n')  + 
-            theme(text = element_text(size = 15)) +
-            xlab("Read length (bases)") +
-            ylab("Mean Q score of read")
-    }else{
-        # promethion
-        p10 = ggplot(subset(d, Q_cutoff=="All reads"), aes(x = sequence_length_template, y = mean_qscore_template, colour = events_per_base)) + 
-            geom_bin2d() + 
-            scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
-            theme(text = element_text(size = 15)) +
-            scale_fill_viridis() +
-            xlab("Read length (bases)") +
-            ylab("Mean Q score of read")
+    flog.info(paste(sep = "", flowcell, ": plotting read length vs. q score scatterplot"))
+    d_tmp <- d %>% filter(sequence_length_template != 0)
+    labs_label = 'Events per base\n'
+
+    # if log10 can be defined, do it
+    if ("events_per_base" %in% names(d_tmp) && min(d_tmp$events_per_base, na.rm=T)>0) {
+        d_tmp$events_per_base = log10(d_tmp$events_per_base)
+        labs_label = paste0(labs_label, '(log scale)\n')
     }
-    
-    
-    if(max(d$events_per_base, na.rm=T)>0){
-        # a catch for 1D2 runs which don't have events per base
-        p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
-    }
+
+    if(max(d$channel)<=512){ bins_number = 2000 } else {bins_number = 5000 }
+
+    p10 = ggplot(subset(d_tmp, Q_cutoff=="All reads"),  aes(x = sequence_length_template, y = mean_qscore_template, z = events_per_base)) +
+        stat_summary_2d(fun = "mean", bins = bins_number, show.legend=TRUE) +
+        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) +
+        theme(text = element_text(size = 15)) +
+        scale_fill_viridis() +
+        xlab("Read length (bases)") +
+        ylab("Mean Q score of read") +
+        labs(fill=labs_label)
+
+    rm(d_tmp)
+
     # we keep it a bit wider, because the legend takes up a fair bit of the plot space
     suppressMessages(ggsave(filename = file.path(output.dir, paste("length_vs_q.", plot_format, sep="")), device=plot_format, width = p2m*960/75, height = p1m*960/75, plot = p10)) #
     
