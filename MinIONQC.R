@@ -477,8 +477,8 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
 			theme(text = element_text(size = 15)) +
 			xlab("Read length (bases)") +
 			ylab("Number of reads") +
-			guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
-	
+			guides(fill="none") + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
+
 	# Add N50 and mean length on p1
 	if (plot_stat) {	
 		# Extract values to display
@@ -523,7 +523,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
         theme(text = element_text(size = 15)) +
         xlab("Mean Q score of read") +
         ylab("Number of reads") +
-        guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
+        guides(fill="none") + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
 
 	# Add mean Qscore on p2
 	if (plot_stat) {
@@ -564,7 +564,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield over time"))
     p5 = ggplot(d, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = Q_cutoff)) + 
         geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
-        geom_line(size = 1) + 
+        geom_line(linewidth = 1) +
         xlab("Hours into run") +
         ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
@@ -573,8 +573,8 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
 
 
     flog.info(paste(sep = "", flowcell, ": plotting flowcell yield by read length"))
-    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) + 
-        geom_line(size = 1) + 
+    p6 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) +
+        geom_line(linewidth = 1) +
         xlab("Minimum read length (bases)") +
         ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
@@ -661,7 +661,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     
     if(max(d$events_per_base, na.rm=T)>0){
         # a catch for 1D2 runs which don't have events per base
-        p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno') 
+        p10 = p10 + scale_colour_viridis(transform = "log", labels = scientific, option = 'inferno')
     }
     # we keep it a bit wider, because the legend takes up a fair bit of the plot space
     suppressMessages(ggsave(filename = file.path(output.dir, paste("length_vs_q.", plot_format, sep="")), device=plot_format, width = p2m*960/75, height = p1m*960/75, plot = p10)) #
@@ -680,9 +680,9 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     p11 = ggplot(cc, aes(x = value, fill = Q_cutoff)) + geom_histogram(bins = 30) + 
         facet_grid(Q_cutoff~variable, scales = "free_x") + 
         theme(text = element_text(size = 15), axis.text.x = element_text(angle = 60, hjust = 1)) +
-        guides(fill=FALSE) +
+        guides(fill="none") +
         scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75) +
-        guides(fill=FALSE)
+        guides(fill="none")
     suppressMessages(ggsave(filename = file.path(output.dir, paste("channel_summary.", plot_format, sep="")), device=plot_format, width = 960/75, height = 480/75, plot = p11)) 
     
 
@@ -697,7 +697,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
 
 
     p12 = ggplot(subset(cc, variable == "Number of bases per channel"), aes(x = as.numeric(col), y = as.numeric(row))) + 
-        geom_tile(aes(fill = value/1000000000), colour="white", size=0.25) +
+        geom_tile(aes(fill = value/1000000000), colour="white", linewidth=0.25) +
         facet_wrap(~Q_cutoff, ncol = cols) + 
         theme(text = element_text(size = 15), 
                 plot.background=element_blank(), 
@@ -706,7 +706,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
                 panel.grid.major = element_blank(), 
                 panel.grid.minor = element_blank()) +
         scale_fill_viridis(name = "GB/channel") +
-        scale_y_continuous(trans = "reverse", expand=c(0,0)) +
+        scale_y_continuous(transform = "reverse", expand=c(0,0)) +
         scale_x_continuous(expand=c(0,0)) +
         coord_fixed() +
         labs(x="channel column",y="channel row")
@@ -776,22 +776,22 @@ combined.flowcell <- function(d, output.dir, q=8){
         theme(text = element_text(size = 15)) +
         xlab("Read length (bases)") +
         ylab("Number of reads") +
-        guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
+        guides(fill="none") + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, paste("combined_length_histogram.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*960/75, plot = p1))
-    
+
     flog.info("Plotting combined mean Q score histogram")
-    p2 = ggplot(d, aes(x = mean_qscore_template, fill = Q_cutoff)) + 
-        geom_histogram(bins = 300) + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+    p2 = ggplot(d, aes(x = mean_qscore_template, fill = Q_cutoff)) +
+        geom_histogram(bins = 300) +
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
         theme(text = element_text(size = 15)) +
         xlab("Mean Q score of read") +
         ylab("Number of reads") +
-        guides(fill=FALSE) + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
+        guides(fill="none") + scale_fill_viridis(discrete = TRUE, begin = 0.25, end = 0.75)
     suppressMessages(ggsave(filename = file.path(output.dir, paste("combined_q_histogram.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*960/75, plot = p2))
         
     flog.info("Plotting combined yield by length")
-    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) + 
-        geom_line(size = 1) + 
+    p4 = ggplot(d, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = Q_cutoff)) +
+        geom_line(linewidth = 1) +
         xlab("Minimum read length (bases)") +
         ylab("Total yield in gigabases") +
         scale_colour_viridis(discrete = TRUE, begin = 0.25, end = 0.75, guide = guide_legend(title = "Reads")) +
@@ -799,7 +799,7 @@ combined.flowcell <- function(d, output.dir, q=8){
     xmax = max(d$sequence_length_template[which(d$cumulative.bases > 0.01 * max(d$cumulative.bases))])
     p4 = p4 + scale_x_continuous(limits = c(0, xmax))
     
-    suppressMessages(ggsave(filename = file.path(output.dir, "combined_yield_by_length.png"), device=plot_format, width = p1m*960/75, height = p1m*480/75, plot = p4))
+    suppressMessages(ggsave(filename = file.path(output.dir, paste("combined_yield_by_length.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*480/75, plot = p4))
     
 }
 
@@ -827,17 +827,17 @@ multi.plots = function(dm, output.dir){
     # make plots
     flog.info("Plotting length distributions")
     p1 = ggplot(dm, aes(x = sequence_length_template)) + 
-        geom_line(stat="density", aes(colour = flowcell), size = 1) +
-        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) + 
-        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
+        geom_line(stat="density", aes(colour = flowcell), linewidth = 1) +
+        scale_x_log10(minor_breaks=log10_minor_break(), breaks = log10_major_break()) +
+        facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
         theme(text = element_text(size = 15)) +
         xlab("Read length (bases)") +
         ylab("Density")
     suppressMessages(ggsave(filename = file.path(output.dir, paste("length_distributions.", plot_format, sep="")), device=plot_format, width = p1m*960/75, height = p1m*960/75, plot = p1)) #
-    
+
     flog.info("Plotting mean Q score distributions")
-    p2 = ggplot(dm, aes(x = mean_qscore_template)) + 
-        geom_line(stat="density", aes(colour = flowcell), size = 1) +
+    p2 = ggplot(dm, aes(x = mean_qscore_template)) +
+        geom_line(stat="density", aes(colour = flowcell), linewidth = 1) +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") + 
         theme(text = element_text(size = 15)) +
         xlab("Mean Q score of read") +
@@ -846,9 +846,9 @@ multi.plots = function(dm, output.dir){
 
 
     flog.info("Plotting flowcell yield over time")
-    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = flowcell)) + 
+    p5 = ggplot(dm, aes(x=start_time/3600, y=cumulative.bases.time/1000000000, colour = flowcell)) +
         geom_vline(xintercept = muxes, colour = 'red', linetype = 'dashed', alpha = 0.5) +
-        geom_line(size = 1) + 
+        geom_line(linewidth = 1) +
         xlab("Hours into run") +
         ylab("Total yield in gigabases") +
         facet_wrap(~Q_cutoff, ncol = 1, scales = "free_y") +
@@ -857,8 +857,8 @@ multi.plots = function(dm, output.dir){
 
         
     flog.info("Plotting flowcell yield by length")
-    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = flowcell)) + 
-        geom_line(size = 1) + 
+    p6 = ggplot(dm, aes(x=sequence_length_template, y=cumulative.bases/1000000000, colour = flowcell)) +
+        geom_line(linewidth = 1) +
         xlab("Minimum read length (bases)") +
         ylab("Total yield in gigabases") +
         theme(text = element_text(size = 15)) + 
