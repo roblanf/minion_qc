@@ -661,7 +661,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     
     if(max(d$events_per_base, na.rm=T)>0){
         # a catch for 1D2 runs which don't have events per base
-        p10 = p10 + scale_colour_viridis(transform = "log", labels = scientific, option = 'inferno')
+        p10 = p10 + scale_colour_viridis(trans = "log", labels = scientific, option = 'inferno')
     }
     # we keep it a bit wider, because the legend takes up a fair bit of the plot space
     suppressMessages(ggsave(filename = file.path(output.dir, paste("length_vs_q.", plot_format, sep="")), device=plot_format, width = p2m*960/75, height = p1m*960/75, plot = p10)) #
@@ -706,7 +706,7 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
                 panel.grid.major = element_blank(), 
                 panel.grid.minor = element_blank()) +
         scale_fill_viridis(name = "GB/channel") +
-        scale_y_continuous(transform = "reverse", expand=c(0,0)) +
+        scale_y_continuous(trans = "reverse", expand=c(0,0)) +
         scale_x_continuous(expand=c(0,0)) +
         coord_fixed() +
         labs(x="channel column",y="channel row")
