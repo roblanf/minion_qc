@@ -74,7 +74,7 @@ test_that('summary function works', {
     expect_equal(s$max.length, 100)
     expect_equal(s$mean.q, 7.5)
     expect_equal(s$median.q, 7.5)
-    expect_equal(s$reads$'>20kb', 0)
+    expect_equal(s$reads$'>=20kb', 0)
 })
 
 test_that('short run works', {
