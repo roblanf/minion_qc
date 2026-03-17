@@ -377,18 +377,18 @@ summary.stats <- function(d, Q_cutoff="All reads"){
                 reads.gt(d, 500000),
                 reads.gt(d, 1000000),
                 ultra.reads)
-    names(reads) = c(">10kb", ">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
+    names(reads) = c(">=10kb", ">=20kb", ">=50kb", ">=100kb", ">=200kb", ">=500kb", ">=1m", "ultralong")
 
     bases = list(
-                bases.gt(d, 10000)/1000000000, 
-                bases.gt(d, 20000)/1000000000, 
+                bases.gt(d, 10000)/1000000000,
+                bases.gt(d, 20000)/1000000000,
                 bases.gt(d, 50000)/1000000000,
                 bases.gt(d, 100000)/1000000000,
                 bases.gt(d, 200000)/1000000000,
                 bases.gt(d, 500000)/1000000000,
                 bases.gt(d, 1000000)/1000000000,
                 ultra.gigabases)
-    names(bases) = c(">10kb", ">20kb", ">50kb", ">100kb", ">200kb", ">500kb", ">1m", "ultralong")
+    names(bases) = c(">=10kb", ">=20kb", ">=50kb", ">=100kb", ">=200kb", ">=500kb", ">=1m", "ultralong")
     
     return(list('total.gigabases' = total.bases/1000000000,
                 'total.reads' = total.reads,
@@ -452,8 +452,8 @@ single.flowcell <- function(input.file, output.dir, q=7, base.dir = NA){
     summary = list("input file" = input.file,
                    "All reads" = all.reads.summary,
                    cutoff = q10.reads.summary,
-                   "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
-    
+                   "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB. Read and base counts for each length threshold are cumulative (i.e. each count includes all reads/bases at or above that threshold).')
+
     names(summary)[3] = q_title
     
     write(as.yaml(summary), out.txt)
@@ -753,8 +753,8 @@ combined.flowcell <- function(d, output.dir, q=8){
     summary = list("input file" = input.file,
                    "All reads" = all.reads.summary,
                    cutoff = q10.reads.summary,
-                   "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB')
-    
+                   "notes" = 'ultralong reads refers to the largest set of reads with N50>100KB. Read and base counts for each length threshold are cumulative (i.e. each count includes all reads/bases at or above that threshold).')
+
     names(summary)[3] = q_title
     
     write(as.yaml(summary), out.txt)
